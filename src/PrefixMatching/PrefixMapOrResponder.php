@@ -65,4 +65,25 @@ final class PrefixMapOrResponder
         }
         return $this->responder;
     }
+
+    /**
+     * @internal 
+     */
+    public static function __set_state($state): PrefixMapOrResponder
+    {
+        return new self(
+            $state['map'],
+            $state['responder'],
+        );
+    }
+    
+    public function __unserialize(array $data): void
+    {
+        [$this->map, $this->responder] = $data;
+    }
+    
+    public function __serialize(): array
+    {
+        return [$this->map, $this->responder];
+    }
 }

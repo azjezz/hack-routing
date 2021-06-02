@@ -23,6 +23,14 @@ final class PrefixMatchingResolver implements IResolver
     }
 
     /**
+     * @return array<non-empty-string, PrefixMap<TResponder>>
+     */
+    public function getMap(): array
+    {
+        return $this->map;
+    }
+
+    /**
      * @template Tr
      *
      * @param array<non-empty-string, array<string, Tr>> $map

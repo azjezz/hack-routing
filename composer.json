@@ -6,13 +6,10 @@
   "homepage": "https://github.com/hhvm/hack-router",
   "require": {
     "php": "^8.0",
-    "azjezz/psl": "^1.7.2",
-    "psr/cache": "^1.0"
+    "azjezz/psl": "^1.7.2"
   },
   "require-dev": {
-    "roave/security-advisories": "dev-latest",
-    "cache/apcu-adapter": "^1.1",
-    "cache/array-adapter": "^1.1"
+    "roave/security-advisories": "dev-latest"
   },
   "autoload": {
     "psr-4": {

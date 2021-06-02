@@ -8,6 +8,8 @@ require_once(__DIR__ . '/../vendor/autoload.php');
 
 use Cache\Adapter\Apcu\ApcuCachePool;
 use Cache\Adapter\PHPArray\ArrayCachePool;
+use HackRouting\Cache\FileCache;
+use HackRouting\Cache\MemoryCache;
 use HackRouting\HttpException\NotFoundException;
 use Psl\{Dict, Env, Filesystem, IO, Iter, Json, Math, Str, Type, Vec, Hash};
 use Psl;
@@ -164,37 +166,25 @@ final class NaiveBenchmark
             Filesystem\delete_file($fast_route_cache);
         }
 
-        $apcu_cache = new ApcuCachePool();
-        $array_cache = new ArrayCachePool();
         $routes = Vec\map(self::getMap(), fn ($row) => $row[0]);
         $map = [HttpMethod::GET => Dict\associate($routes, $routes)];
 
         return [
-            'simple regexp                 ~> ' => static fn () => new SimpleRegexpResolver($map),
-            'uncached prefix match         ~> ' => static fn () => PrefixMatchingResolver::fromFlatMap($map),
-            'cached prefix match - apcu    ~> ' => static function () use ($map, $apcu_cache) {
-                $item = $apcu_cache->getItem(Hash\hash(__FUNCTION__, 'sha1'));
-                if ($item->isHit()) {
-                    $prefix_map = $item->get();
-                } else {
-                    $prefix_map = Dict\map($map, fn ($v) => PrefixMatching\PrefixMap::fromFlatMap($v));
-
-                    $item->set($prefix_map);
-                    $apcu_cache->save($item);
-                }
+            'simple regexp                ~> ' => static fn () => new SimpleRegexpResolver($map),
+            'uncached prefix match        ~> ' => static fn () => PrefixMatchingResolver::fromFlatMap($map),
+            'cached prefix match - file   ~> ' => static function () use ($map) {
+                $cache = new FileCache();
+                $prefix_map = $cache->fetch(__FUNCTION__ . 'file', function() use($map) {
+                    return Dict\map($map, fn ($v) => PrefixMatching\PrefixMap::fromFlatMap($v));
+                });
 
                 return new PrefixMatchingResolver($prefix_map);
             },
-            'cached prefix match - array   ~> ' => static function () use ($map, $array_cache) {
-                $item = $array_cache->getItem(Hash\hash(__FUNCTION__, 'sha1'));
-                if ($item->isHit()) {
-                    $prefix_map = $item->get();
-                } else {
-                    $prefix_map = Dict\map($map, fn ($v) => PrefixMatching\PrefixMap::fromFlatMap($v));
-
-                    $item->set($prefix_map);
-                    $array_cache->save($item);
-                }
+            'cached prefix match - memory ~> ' => static function () use ($map) {
+                $memory = new MemoryCache();
+                $prefix_map = $memory->fetch(__FUNCTION__ . 'memory', function() use($map) {
+                    return Dict\map($map, fn ($v) => PrefixMatching\PrefixMap::fromFlatMap($v));
+                });
 
                 return new PrefixMatchingResolver($prefix_map);
             },

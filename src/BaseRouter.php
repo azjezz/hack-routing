@@ -3,9 +3,10 @@
 namespace HackRouting;
 
 use Psl\{Dict, Iter, Vec};
+use HackRouting\Cache\CacheInterface;
+use HackRouting\Cache\NullCache;
 use HackRouting\HttpException\MethodNotAllowedException;
 use HackRouting\HttpException\NotFoundException;
-use Psr\Cache\CacheItemPoolInterface;
 
 use function urldecode;
 
@@ -14,13 +15,16 @@ use function urldecode;
  */
 abstract class BaseRouter
 {
+    private CacheInterface $cache;
+
     /**
      * @var ?IResolver<TResponder>
      */
     private ?IResolver $resolver = null;
 
-    public function __construct(protected ?CacheItemPoolInterface $cache = null)
+    public function __construct(?CacheInterface $cache = null)
     {
+        $this->cache = $cache ?? new NullCache();
     }
 
     /**
@@ -33,8 +37,8 @@ abstract class BaseRouter
      *
      * @return array{0: TResponder, 1: array<string, string>}
      *
-     * @throws \HackRouting\HttpException\NotFoundException
-     * @throws \HackRouting\HttpException\MethodNotAllowedException
+     * @throws NotFoundException
+     * @throws MethodNotAllowedException
      */
     final public function routeMethodAndPath(string $method, string $path): array
     {
@@ -84,32 +88,18 @@ abstract class BaseRouter
     /**
      * @return IResolver<TResponder>
      */
-    protected function getResolver(): IResolver
+    public function getResolver(): IResolver
     {
         if ($this->resolver !== null) {
             return $this->resolver;
         }
 
-        if (null === $this->cache) {
-            $routes = null;
-        } else {
-            $item = $this->cache->getItem(__FILE__ . '/cache');
-            $routes = $item->isHit() ? $item->get() : null;
-        }
-
-        if ($routes === null) {
-            $routes = Dict\map(
+        $routes = $this->cache->fetch(__FILE__, function(): array {
+            return Dict\map(
                 $this->getRoutes(),
                 static fn($method_routes) => PrefixMatching\PrefixMap::fromFlatMap(Dict\from_iterable($method_routes)),
             );
-
-            if (null !== $this->cache) {
-                $item = $this->cache->getItem(__FILE__ . '/cache');
-                $item->set($routes);
-
-                $this->cache->save($item);
-            }
-        }
+        });
 
         $this->resolver = new PrefixMatchingResolver($routes);
         return $this->resolver;

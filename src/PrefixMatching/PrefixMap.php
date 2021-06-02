@@ -181,4 +181,26 @@ final class PrefixMap
             'regexps' => Dict\map($this->regexps, fn ($it) => $it->getSerializable()),
         ], fn ($it) => !Iter\is_empty($it));
     }
+
+    /**
+     * @internal
+     */
+    public static function __set_state($state): PrefixMap
+    {
+        return new self(
+            $state['literals'],
+            $state['prefixes'],
+            $state['regexps'],
+        );
+    }
+    
+    public function __serialize(): array
+    {
+        return [$this->literals, $this->prefixes, $this->regexps];
+    }
+    
+    public function __unserialize(array $data): void
+    {
+        [$this->literals, $this->prefixes, $this->regexps] = $data;
+    }
 }
