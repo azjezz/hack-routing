@@ -1,35 +1,32 @@
-<?hh // strict
-/*
- *  Copyright (c) 2015-present, Facebook, Inc.
- *  All rights reserved.
- *
- *  This source code is licensed under the MIT license found in the
- *  LICENSE file in the root directory of this source tree.
- *
- */
+<?php
 
-namespace Facebook\HackRouter\PatternParser;
+declare(strict_types=1);
 
-use namespace HH\Lib\{Str, Vec};
+namespace HackRouting\PatternParser;
 
-final class PatternNode implements Node {
-  public function __construct(private vec<Node> $children) {
-  }
+use Psl\{Str, Vec};
 
-  public function getChildren(): vec<Node> {
-    return $this->children;
-  }
+final class PatternNode implements Node
+{
+    /**
+     * @param list<Node> $children
+     */
+    public function __construct(private array $children)
+    {
+    }
 
-  public function toStringForDebug(): string {
-    return $this->children
-      |> Vec\map($$, $child ==> $child->toStringForDebug())
-      |> Str\join($$, ', ')
-      |> '['.$$.']';
-  }
+    public function getChildren(): array
+    {
+        return $this->children;
+    }
 
-  public function asRegexp(string $delimiter): string {
-    return $this->children
-      |> Vec\map($$, $child ==> $child->asRegexp($delimiter))
-      |> Str\join($$, '');
-  }
+    public function toStringForDebug(): string
+    {
+        return '[' . Str\join(Vec\map($this->children, static fn(Node $child): string => $child->toStringForDebug()), ', ') . ']';
+    }
+
+    public function asRegexp(string $delimiter): string
+    {
+        return Str\join(Vec\map($this->children, static fn(Node $child): string => $child->asRegexp($delimiter)), '');
+    }
 }

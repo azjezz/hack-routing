@@ -1,14 +1,11 @@
-<?hh // strict
-/*
- *  Copyright (c) 2015-present, Facebook, Inc.
- *  All rights reserved.
- *
- *  This source code is licensed under the MIT license found in the
- *  LICENSE file in the root directory of this source tree.
- *
- */
+<?php
 
-namespace Facebook\HackRouter\PatternParser;
+declare(strict_types=1);
+
+namespace HackRouting\PatternParser;
+
+use Psl\Str;
+use function preg_quote;
 
 final class ParameterNode implements Node {
   public function __construct(private string $name, private ?string $regexp) {
@@ -28,7 +25,7 @@ final class ParameterNode implements Node {
       return '{'.$this->getName().'}';
     }
 
-    return \sprintf('{%s: #%s#}', $this->getName(), $this->getRegexp());
+    return Str\format('{%s: #%s#}', $this->getName(), $this->getRegexp());
   }
 
   public function asRegexp(string $delimiter): string {
@@ -36,6 +33,6 @@ final class ParameterNode implements Node {
     if ($re === null) {
       $re = '[^/]+';
     }
-    return '(?<'.\preg_quote($this->getName(), $delimiter).'>'.$re.')';
+    return '(?<'. preg_quote($this->getName(), $delimiter).'>'.$re.')';
   }
 }

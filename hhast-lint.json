@@ -1,4 +1,0 @@
-{
-  "roots": [ "src/", "tests/", "examples/" ],
-  "builtinLinters": "all"
-}

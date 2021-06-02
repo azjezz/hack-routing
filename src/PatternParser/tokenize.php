@@ -1,31 +1,30 @@
-<?hh // strict
-/*
- *  Copyright (c) 2015-present, Facebook, Inc.
- *  All rights reserved.
- *
- *  This source code is licensed under the MIT license found in the
- *  LICENSE file in the root directory of this source tree.
- *
+<?php
+
+declare(strict_types=1);
+
+namespace HackRouting\PatternParser;
+
+use Psl\{Str, Vec};
+
+/**
+ * @return list<Token>
  */
-
-namespace Facebook\HackRouter\PatternParser;
-
-use namespace HH\Lib\{Str, Vec};
-
-function tokenize(string $pattern): vec<Token> {
-  $tokens = vec[];
+function tokenize(string $pattern): array {
+  $tokens = [];
   $buffer = '';
   foreach (Str\split($pattern, '') as $byte) {
-    if (TokenType::isValid($byte)) {
-      $tokens[] = tuple(TokenType::STRING, $buffer);
-      $buffer = '';
-      $tokens[] = tuple(TokenType::assert($byte), $byte);
+    if (Token::isValidType($byte)) {
+        $tokens[] = new Token(Token::TYPE_STRING, $buffer);
+        $buffer = '';
+        $tokens[] = new Token($byte, $byte);
     } else {
       $buffer .= $byte;
     }
   }
+
   if ($buffer !== '') {
-    $tokens[] = tuple(TokenType::STRING, $buffer);
+    $tokens[] = new Token(Token::TYPE_STRING, $buffer);
   }
-  return Vec\filter($tokens, $t ==> $t !== tuple(TokenType::STRING, ''));
+
+  return Vec\filter($tokens, static fn(Token $t): bool => !($t->getType() === Token::TYPE_STRING && $t->getValue() === ''));
 }
