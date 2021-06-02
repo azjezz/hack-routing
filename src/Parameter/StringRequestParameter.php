@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace HackRouting\Parameter;
 
 use Psl;
-use Psl\Str;
+use Psl\Str\Byte as Str;
 
 /**
  * @extends TypedUriParameter<string>

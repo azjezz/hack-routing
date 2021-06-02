@@ -18,6 +18,6 @@ abstract class TypedUriParameter extends UriParameter implements TypedRequestPar
      */
     public function getUriFragment(mixed $value): string
     {
-        return Type\string()->coerce($value);
+        return (string) $value;
     }
 }

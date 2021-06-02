@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace HackRouting;
 
-use Psl\{Dict, Iter, Regex, Type};
+use Psl\{Dict, Iter, Type};
 use HackRouting\HttpException\NotFoundException;
 
 /**
@@ -48,8 +48,7 @@ final class SimpleRegexpResolver implements IResolver
 
         $map = $this->map[$method];
         foreach ($map as $regexp => $responder) {
-            $matches = Regex\first_match($path, $regexp);
-            if (null === $matches) {
+            if (preg_match($regexp, $path, $matches) !== 1) {
                 continue;
             }
 

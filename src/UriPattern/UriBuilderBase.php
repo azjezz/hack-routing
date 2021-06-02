@@ -92,7 +92,7 @@ abstract class UriBuilderBase
         );
 
         Psl\invariant(
-            Type\object($parameter_type)->matches($part),
+            $part instanceof $parameter_type,
             'Expected %s to be a %s, got a %s',
             $name,
             $parameter_type,

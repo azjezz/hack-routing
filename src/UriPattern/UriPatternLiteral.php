@@ -3,7 +3,7 @@
 namespace HackRouting\UriPattern;
 
 use Psl;
-use Psl\Str;
+use Psl\Str\Byte as Str;
 
 final class UriPatternLiteral implements UriPatternPart {
   public function __construct(private string $value) {

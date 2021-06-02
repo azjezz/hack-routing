@@ -99,9 +99,8 @@ abstract class RequestParametersBase
      */
     private static function getSpec(array $specs, string $class, string $name): object
     {
-        $type = Type\object($class);
         $spec = $specs[$name];
-        Psl\invariant($type->matches($spec), 'Expected %s to be a %s, got %s', $name, $class, $spec::class);
+        Psl\invariant($spec instanceof $class, 'Expected %s to be a %s, got %s', $name, $class, $spec::class);
 
         return $spec;
     }

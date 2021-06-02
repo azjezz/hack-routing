@@ -169,20 +169,21 @@ final class NaiveBenchmark
         $routes = Vec\map(self::getMap(), fn ($row) => $row[0]);
         $map = [HttpMethod::GET => Dict\associate($routes, $routes)];
 
+        $cache = new FileCache();
+        $memory = new MemoryCache();
+
         return [
-            'simple regexp                ~> ' => static fn () => new SimpleRegexpResolver($map),
-            'uncached prefix match        ~> ' => static fn () => PrefixMatchingResolver::fromFlatMap($map),
-            'cached prefix match - file   ~> ' => static function () use ($map) {
-                $cache = new FileCache();
-                $prefix_map = $cache->fetch(__FUNCTION__ . 'file', function() use($map) {
+            'simple regexp' => static fn () => new SimpleRegexpResolver($map),
+            'uncached prefix match' => static fn () => PrefixMatchingResolver::fromFlatMap($map),
+            'cached prefix match' => static function () use ($map, $cache) {
+                $prefix_map = $cache->fetch(__FUNCTION__, function() use($map) {
                     return Dict\map($map, fn ($v) => PrefixMatching\PrefixMap::fromFlatMap($v));
                 });
 
                 return new PrefixMatchingResolver($prefix_map);
             },
-            'cached prefix match - memory ~> ' => static function () use ($map) {
-                $memory = new MemoryCache();
-                $prefix_map = $memory->fetch(__FUNCTION__ . 'memory', function() use($map) {
+            'cached prefix match ( memory )' => static function () use ($map, $memory) {
+                $prefix_map = $memory->fetch(__FUNCTION__, function() use($map) {
                     return Dict\map($map, fn ($v) => PrefixMatching\PrefixMap::fromFlatMap($v));
                 });
 

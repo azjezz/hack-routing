@@ -6,7 +6,9 @@ namespace HackRouting;
 
 use HackRouting\HttpException\NotFoundException;
 use HackRouting\PrefixMatching\PrefixMap;
-use Psl\{Dict, Iter, Regex, Str, Type};
+use Psl\{Dict, Iter, Str\Byte as Str, Type};
+use function is_string;
+use function preg_match;
 
 /**
  * @template-covariant TResponder
@@ -90,16 +92,14 @@ final class PrefixMatchingResolver implements IResolver
 
         $regexps = $map->getRegexps();
         foreach ($regexps as $regexp => $sub) {
-            $pattern = '#^' . $regexp . '#';
-            $matches = Regex\first_match($path, $pattern);
-            if (null === $matches) {
+            if (preg_match('#^' . $regexp . '#', $path, $matches) !== 1) {
                 continue;
             }
 
             $matched = $matches[0];
             $remaining = Str\strip_prefix($path, $matched);
 
-            $data = Dict\filter_keys($matches, static fn($key) => Type\string()->matches($key));
+            $data = Dict\filter_keys($matches, static fn($key) => is_string($key));
             if ($sub->isResponder()) {
                 if ($remaining === '') {
                     return array($sub->getResponder(), $data);

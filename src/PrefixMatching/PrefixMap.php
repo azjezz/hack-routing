@@ -3,7 +3,7 @@
 namespace HackRouting\PrefixMatching;
 
 use HackRouting\PatternParser\{LiteralNode, Node, ParameterNode, Parser};
-use Psl\{Dict, Iter, Math, Str, Vec};
+use Psl\{Dict, Iter, Math, Str\Byte, Str, Vec};
 use Psl;
 
 /**
@@ -98,7 +98,7 @@ final class PrefixMap
             if ($node instanceof ParameterNode && $node->getRegexp() === null) {
                 $next = Iter\first($nodes);
                 if (
-                    $next instanceof LiteralNode && Str\starts_with($next->getText(), '/')
+                    $next instanceof LiteralNode && Byte\starts_with($next->getText(), '/')
                 ) {
                     $regexps[] = array($node->asRegexp('#'), $nodes, $responder);
                     continue;
@@ -124,7 +124,7 @@ final class PrefixMap
                             return array($row[1], $row[2]);
                         }
 
-                        $suffix = Str\strip_prefix($row[0], $prefix);
+                        $suffix = Byte\strip_prefix($row[0], $prefix);
                         return array(
                             Vec\concat([new LiteralNode($suffix)], $row[1]),
                             $row[2],
@@ -163,11 +163,11 @@ final class PrefixMap
         if (Iter\is_empty($keys)) {
             return [];
         }
-        $lens = Vec\map($keys, static fn (string $key): int => Str\length($key));
+        $lens = Vec\map($keys, static fn (string $key): int => Byte\length($key));
         $min = Math\min($lens);
         Psl\invariant($min !== 0, "Shouldn't have 0-length prefixes");
 
-        return Dict\group_by($keys, static fn (string $key): string => Str\slice($key, 0, $min));
+        return Dict\group_by($keys, static fn (string $key): string => Byte\slice($key, 0, $min));
     }
 
     /**

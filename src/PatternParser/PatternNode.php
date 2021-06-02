@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace HackRouting\PatternParser;
 
-use Psl\{Str, Vec};
+use Psl\{Str , Vec};
 
 final class PatternNode implements Node
 {
