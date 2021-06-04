@@ -11,6 +11,7 @@ use Psl\Filesystem;
 final class FileCache implements CacheInterface
 {
     private string $directory;
+    private array $memory = [];
 
     public function __construct(?string $directory = null)
     {
@@ -26,14 +27,19 @@ final class FileCache implements CacheInterface
      */
     public function fetch(string $item, callable $factory): array
     {
-        $file = $this->directory . '/' . md5($item) . '.php';
-        if (Filesystem\exists($file)) {
-            return require $file;
+        if (isset($this->memory[$item])) {
+            return $this->memory[$item];
         }
 
-        $result = $factory();
+        $file = $this->directory . '/' . md5($item) . '.php';
+        if (Filesystem\exists($file)) {
+            $result = require $file;
+        } else {
+            $result = $factory();
+            Filesystem\write_file($file, "<?php return " . var_export($result, true) . ';');
+        }
 
-        Filesystem\write_file($file, "<?php return " . var_export($result, true) . ';');
+        $this->memory[$item] = $result;
 
         return $result;
     }
