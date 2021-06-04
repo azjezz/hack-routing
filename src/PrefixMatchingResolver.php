@@ -73,13 +73,13 @@ final class PrefixMatchingResolver implements IResolver
      */
     private function resolveWithMap(string $path, PrefixMap $map): array
     {
-        $literals = $map->getLiterals();
-        if (Iter\contains_key($literals, $path)) {
+        $literals = $map->literals;
+        if (\array_key_exists($path, $literals)) {
             return array($literals[$path], []);
         }
 
-        $prefixes = $map->getPrefixes();
-        if (!Iter\is_empty($prefixes)) {
+        $prefixes = $map->prefixes;
+        if (!empty($prefixes)) {
             $prefix_len = Str\length((string)Iter\first_key($prefixes));
             $prefix = Str\slice($path, 0, $prefix_len);
             if (Iter\contains_key($prefixes, $prefix)) {
@@ -90,8 +90,7 @@ final class PrefixMatchingResolver implements IResolver
             }
         }
 
-        $regexps = $map->getRegexps();
-        foreach ($regexps as $regexp => $sub) {
+        foreach ($map->regexps as $regexp => $sub) {
             if (preg_match('#^' . $regexp . '#', $path, $matches) !== 1) {
                 continue;
             }
