@@ -1,5 +1,13 @@
-Hack-Routing [![Build Status](https://travis-ci.org/hhvm/hack-router.svg?branch=master)](https://travis-ci.org/hhvm/hack-router)
+Hack-Routing
 ===========
+
+![Unit tests status](https://github.com/azjezz/hack-routing/workflows/unit%20tests/badge.svg)
+![Static analysis status](https://github.com/azjezz/hack-routing/workflows/static%20analysis/badge.svg)
+![Coding standards status](https://github.com/azjezz/hack-routing/workflows/coding%20standards/badge.svg)
+[![Type Coverage](https://shepherd.dev/github/azjezz/hack-routing/coverage.svg)](https://shepherd.dev/github/azjezz/hack-routing)
+[![Total Downloads](https://poser.pugx.org/azjezz/hack-routing/d/total.svg)](https://packagist.org/packages/azjezz/hack-routing)
+[![Latest Stable Version](https://poser.pugx.org/azjezz/hack-routing/v/stable.svg)](https://packagist.org/packages/azjezz/hack-routing)
+[![License](https://poser.pugx.org/azjezz/hack-routing/license.svg)](https://packagist.org/packages/azjezz/hack-routing)
 
 Fast, type-safe request routing, parameter retrieval, and link generation.
 
