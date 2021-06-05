@@ -1,0 +1,47 @@
+name: "naive benchmarks"
+
+on:
+  pull_request: ~
+  push: ~
+
+jobs:
+  unit-tests:
+    name: "naive benchmarks"
+
+    runs-on: ${{ matrix.operating-system }}
+
+    strategy:
+      matrix:
+        php-version:
+          - "8.0"
+        operating-system:
+          - "macos-latest"
+          - "ubuntu-latest"
+          - "windows-latest"
+
+    steps:
+      - name: "checkout"
+        uses: "actions/checkout@v2"
+
+      - name: "installing PHP"
+        uses: "shivammathur/setup-php@v2"
+        with:
+          php-version: "${{ matrix.php-version }}"
+          ini-values: memory_limit=-1
+          tools: composer:v2, cs2pr
+          extensions: bcmath, mbstring, intl, sodium, json, opcache, apcu
+
+      - name: "caching dependencies"
+        uses: "actions/cache@v2"
+        with:
+          path: |
+            ~/.composer/cache
+            vendor
+          key: "php-${{ matrix.php-version }}"
+          restore-keys: "php-${{ matrix.php-version }}"
+
+      - name: "installing dependencies"
+        run: "composer install --no-interaction --no-progress --ignore-platform-req php"
+
+      - name: "running naive benchmarks"
+        run: "php -dopcache.jit=1235 -dopcache.enable_cli=yes -dopcache.enable=yes -dapc.enable=1 -dapc.enable_cli=1 bin/naive-benchmark.php"
