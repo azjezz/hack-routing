@@ -1,15 +1,35 @@
 {
-  "name": "facebook/hack-router",
-  "description": "URI routing for Hack",
+  "name": "azjezz/hack-routing",
+  "description": "Fast, type-safe request routing, parameter retrieval, and link generation.",
   "license": "MIT",
-  "keywords": ["hack", "router", "routing", "hhvm"],
-  "homepage": "https://github.com/hhvm/hack-router",
+  "keywords": [
+    "hack",
+    "router",
+    "routing",
+    "http"
+  ],
+  "authors": [
+    {
+      "name": "Fred Emmott",
+      "homepage": "https://github.com/fredemmott"
+    },
+    {
+      "name": "Saif Eddin Gmati",
+      "homepage": "https://github.com/azjezz"
+    }
+  ],
+  "homepage": "https://github.com/azjezz/hack-routing",
   "require": {
     "php": "^8.0",
     "azjezz/psl": "^1.7.2"
   },
   "require-dev": {
-    "roave/security-advisories": "dev-latest"
+    "ext-apcu": "*",
+    "roave/security-advisories": "dev-latest",
+    "phpunit/phpunit": "^9.5.4",
+    "squizlabs/php_codesniffer": "^3.6",
+    "vimeo/psalm": "^4.7.3",
+    "php-standard-library/psalm-plugin": "^1.1.1"
   },
   "autoload": {
     "psr-4": {
@@ -19,9 +39,9 @@
       "src/PatternParser/tokenize.php"
     ]
   },
-  "extra": {
-    "branch-alias": {
-      "dev-master": "1.x-dev"
+  "autoload-dev": {
+    "psr-4": {
+      "HackRouting\\Tests\\": "tests/"
     }
   }
 }

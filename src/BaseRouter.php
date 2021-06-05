@@ -8,7 +8,7 @@ use HackRouting\Cache\NullCache;
 use HackRouting\HttpException\MethodNotAllowedException;
 use HackRouting\HttpException\NotFoundException;
 
-use function urldecode;
+use function rawurldecode;
 
 /**
  * @template-covariant TResponder
@@ -28,9 +28,9 @@ abstract class BaseRouter
     }
 
     /**
-     * @return iterable<non-empty-string, iterable<string, TResponder>>
+     * @return array<non-empty-string, array<string, TResponder>>
      */
-    abstract protected function getRoutes(): iterable;
+    abstract protected function getRoutes(): array;
 
     /**
      * @param non-empty-string $method
@@ -45,7 +45,7 @@ abstract class BaseRouter
         $resolver = $this->getResolver();
         try {
             [$responder, $data] = $resolver->resolve($method, $path);
-            $data = Dict\map($data, static fn($value) => urldecode($value));
+            $data = Dict\map($data, static fn(string $value): string => rawurldecode($value));
             return [$responder, $data];
         } catch (NotFoundException $e) {
             $allowed = $this->getAllowedMethods($path);
@@ -55,7 +55,7 @@ abstract class BaseRouter
 
             if ($method === HttpMethod::HEAD && $allowed === [HttpMethod::GET]) {
                 [$responder, $data] = $resolver->resolve(HttpMethod::GET, $path);
-                $data = Dict\map($data, fn($value) => urldecode($value));
+                $data = Dict\map($data, static fn(string $value): string => rawurldecode($value));
                 return [$responder, $data];
             }
 
@@ -97,7 +97,10 @@ abstract class BaseRouter
         $routes = $this->cache->fetch(__FILE__, function(): array {
             return Dict\map(
                 $this->getRoutes(),
-                static fn($method_routes) => PrefixMatching\PrefixMap::fromFlatMap(Dict\from_iterable($method_routes)),
+                /**
+                 * @param array<string, TResponder> $method_routes
+                 */
+                static fn(array $method_routes): PrefixMatching\PrefixMap => PrefixMatching\PrefixMap::fromFlatMap($method_routes),
             );
         });
 

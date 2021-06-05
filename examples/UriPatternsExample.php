@@ -4,7 +4,7 @@
  * IF YOU EDIT THIS FILE also update the snippet in README.md
  ***********/
 
-namespace Facebook\HackRouter\Examples\UrlPatternsExample;
+namespace HackRouting\Examples\UrlPatternsExample;
 
 require_once(__DIR__ . '/../vendor/autoload.php');
 
@@ -93,29 +93,32 @@ final class UriPatternsExample extends BaseRouter
     }
 
     /**
-     * @return iterable<non-empty-string, iterable<string, class-string<WebController>>>
+     * @return array<non-empty-string, array<string, class-string<WebController>>>
      */
-    public function getRoutes(): iterable
+    public function getRoutes(): array
     {
         $urls_to_controllers = [];
         foreach (self::getControllers() as $controller) {
             $pattern = $controller::getFastRoutePattern();
             $urls_to_controllers[$pattern] = $controller;
         }
-        
-        yield HttpMethod::GET => $urls_to_controllers;
+
+        return [
+            HttpMethod::GET => $urls_to_controllers
+        ];
     }
 }
 
 /**
  * @return iterable<string>
  */
-function get_example_paths(): iterable {
+function get_example_paths(): iterable
+{
     yield HomePageController::getUriBuilder()->getPath();
     yield UserPageController::getUriBuilder()->setString('user_name', 'Mr Hankey')->getPath();
 }
 
-(static function(): void {
+(static function (): void {
     $output = IO\output_handle();
     $router = new UriPatternsExample();
     foreach (get_example_paths() as $path) {
@@ -128,6 +131,6 @@ function get_example_paths(): iterable {
         $request = Str\pad_right(Str\format('%s %s', $method, $path), 25);
         $output->write(Str\format("%s -> %s\n", $request, (new $controller($params))->getResponse()));
     }
-    
+
     exit(0);
 })();

@@ -13,7 +13,7 @@ use Psl\Vec;
 class UriPattern implements HasFastRouteFragment
 {
     /**
-     * @list<UriPatternPart>
+     * @var list<UriPatternPart>
      */
     private array $parts = [];
 
@@ -53,8 +53,6 @@ class UriPattern implements HasFastRouteFragment
         return $out;
     }
 
-    ///// Convenience Methods /////
-
     final public function literal(string $part): static
     {
         return $this->appendPart(new UriPatternLiteral($part));
@@ -82,12 +80,4 @@ class UriPattern implements HasFastRouteFragment
     {
         return $this->appendPart(new IntRequestParameter($name));
     }
-
-    // final public function enum<T>(
-    //   /* HH_FIXME[2053] \HH\BuiltinEnum is an implementation detail */
-    //   classname<\HH\BuiltinEnum<T>> $enum_class,
-    //   string $name,
-    // ): this {
-    //   return $this->appendPart(new EnumRequestParameter($enum_class, $name));
-    // }
 }

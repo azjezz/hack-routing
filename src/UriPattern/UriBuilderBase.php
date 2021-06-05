@@ -18,6 +18,7 @@ abstract class UriBuilderBase
      * @var list<UriPatternPart>
      */
     protected array $parts;
+
     /**
      * @var array<string, RequestParameter>
      */
@@ -91,6 +92,7 @@ abstract class UriBuilderBase
             Str\join(Vec\map(Vec\keys($this->parameters), fn(string $x): string => "'" . $x . "'"), ', '),
         );
 
+        /** @var TypedUriParameter<T> $part */
         Psl\invariant(
             $part instanceof $parameter_type,
             'Expected %s to be a %s, got a %s',

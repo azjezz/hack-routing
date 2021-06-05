@@ -15,6 +15,9 @@ final class PatternNode implements Node
     {
     }
 
+    /**
+     * @return list<Node>
+     */
     public function getChildren(): array
     {
         return $this->children;

@@ -7,18 +7,19 @@ namespace HackRouting\PrefixMatching;
 use Psl;
 
 /**
- * @template T
+ * @template TResponder
  */
 final class PrefixMapOrResponder
 {
     /**
-     * @param null|PrefixMap<T> $map
-     * @param null|T $responder
+     * @param null|PrefixMap<TResponder> $map
+     * @param null|TResponder $responder
      */
     public function __construct(
         private ?PrefixMap $map,
         private mixed $responder,
-    ) {
+    )
+    {
         Psl\invariant(
             ($map === null) !== ($responder === null),
             'Must specify map *or* responder',
@@ -36,7 +37,7 @@ final class PrefixMapOrResponder
     }
 
     /**
-     * @return PrefixMap<T>
+     * @return PrefixMap<TResponder>
      */
     public function getMap(): PrefixMap
     {
@@ -46,7 +47,7 @@ final class PrefixMapOrResponder
     }
 
     /**
-     * @return T
+     * @return TResponder
      */
     public function getResponder(): mixed
     {
@@ -56,34 +57,22 @@ final class PrefixMapOrResponder
     }
 
     /**
-     * @return array<string, array<string, mixed>>|T|null
+     * @return  array{map: null|PrefixMap<TResponder>, responder: null|TResponder}
+     *
+     * @internal
      */
-    public function getSerializable(): mixed
+    public function __serialize(): array
     {
-        if ($this->isMap()) {
-            return $this->getMap()->getSerializable();
-        }
-        return $this->responder;
+        return ['map' => $this->map, 'responder' => $this->responder];
     }
 
     /**
-     * @internal 
+     * @param array{map: null|PrefixMap<TResponder>, responder: null|TResponder} $data
+     *
+     * @internal
      */
-    public static function __set_state($state): PrefixMapOrResponder
-    {
-        return new self(
-            $state['map'],
-            $state['responder'],
-        );
-    }
-    
     public function __unserialize(array $data): void
     {
-        [$this->map, $this->responder] = $data;
-    }
-    
-    public function __serialize(): array
-    {
-        return [$this->map, $this->responder];
+        ['map' => $this->map, 'responder' => $this->responder] = $data;
     }
 }

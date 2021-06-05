@@ -14,10 +14,10 @@ use Psl\Type;
 abstract class TypedUriParameter extends UriParameter implements TypedRequestParameter
 {
     /**
-     * @param T $value
+     * @param T $input
      */
-    public function getUriFragment(mixed $value): string
+    public function getUriFragment(mixed $input): string
     {
-        return (string) $value;
+        return (string) $input;
     }
 }

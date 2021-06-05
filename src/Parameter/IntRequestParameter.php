@@ -11,7 +11,7 @@ use Psl\Type;
  */
 final class IntRequestParameter extends TypedUriParameter  {
   public function assert(string $input): int {
-      return Type\int()->assert($input);
+      return Type\int()->coerce($input);
   }
 
   public function getRegExpFragment(): ?string {

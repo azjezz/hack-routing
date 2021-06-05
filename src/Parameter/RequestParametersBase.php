@@ -35,13 +35,14 @@ abstract class RequestParametersBase
         iterable $required_specs,
         iterable $optional_specs,
         iterable $values,
-    )
-    {
+    ) {
         $this->values = Dict\from_iterable($values);
 
         $spec_vector_to_map =
             /**
              * @param iterable<RequestParameter> $specs
+             * 
+             * @return array<string, RequestParameter>
              */
             static fn(iterable $specs) => Dict\pull(
                 $specs,
@@ -54,7 +55,7 @@ abstract class RequestParametersBase
     }
 
     /**
-     * @template  T of RequestParameter
+     * @template T of RequestParameter
      *
      * @param class-string<T> $class
      *
@@ -99,7 +100,7 @@ abstract class RequestParametersBase
      */
     private static function getSpec(array $specs, string $class, string $name): object
     {
-        $spec = $specs[$name];
+        $spec = $specs[$name] ?? null;
         Psl\invariant($spec instanceof $class, 'Expected %s to be a %s, got %s', $name, $class, $spec::class);
 
         return $spec;
@@ -108,7 +109,7 @@ abstract class RequestParametersBase
     /**
      * @template T
      *
-     * @param class-string<TypedRequestParameter<T>> $class
+     * @param class-string<RequestParameter&TypedRequestParameter<T>> $class
      *
      * @return T
      */
@@ -123,7 +124,7 @@ abstract class RequestParametersBase
     /**
      * @template T
      *
-     * @param class-string<TypedRequestParameter<T>> $class
+     * @param class-string<RequestParameter&TypedRequestParameter<T>> $class
      *
      * @return T|null
      */

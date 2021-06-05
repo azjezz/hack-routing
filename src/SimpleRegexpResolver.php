@@ -26,9 +26,14 @@ final class SimpleRegexpResolver implements IResolver
     {
         $this->map = Dict\map(
             $map,
-            fn(array $routes) => Dict\map_keys(
+            /**
+             * @param array<string, TResponder> $routes
+             *
+             * @return array<string, TResponder>
+             */
+            static fn(array $routes): array => Dict\map_keys(
                 $routes,
-                fn($route) => self::fastRouteToRegexp($route),
+                static fn(string $route): string => self::fastRouteToRegexp($route),
             ),
         );
     }
@@ -52,7 +57,7 @@ final class SimpleRegexpResolver implements IResolver
                 continue;
             }
 
-            $parameters = Dict\filter_keys($matches, fn($key) => Type\string()->matches($key));
+            $parameters = Dict\filter_keys($matches, static fn(mixed $key): bool => Type\string()->matches($key));
             $parameters = Type\dict(Type\string(), Type\string())->coerce($parameters);
 
             return [$responder, $parameters];

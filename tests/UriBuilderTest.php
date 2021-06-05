@@ -1,105 +1,97 @@
-<?hh // strict
-/*
- *  Copyright (c) 2015-present, Facebook, Inc.
- *  All rights reserved.
- *
- *  This source code is licensed under the MIT license found in the
- *  LICENSE file in the root directory of this source tree.
- *
- */
+<?php
 
-namespace Facebook\HackRouter;
+declare(strict_types=1);
 
-use type Facebook\HackRouter\Tests\{TestIntEnum, TestStringEnum};
-use function Facebook\FBExpect\expect;
+namespace HackRouting\Tests;
 
-final class UriBuilderTest extends \Facebook\HackTest\HackTest {
-  public function testLiteral(): void {
-    $parts = (new UriPattern())
-      ->literal('/foo')
-      ->getParts();
-    expect((new UriBuilder($parts))->getPath())->toBeSame('/foo');
-  }
+use HackRouting\UriPattern\UriBuilder;
+use HackRouting\UriPattern\UriPattern;
+use PHPUnit\Framework\TestCase;
+use Psl\Exception\InvariantViolationException;
 
-  public function testStringParameter(): void {
-    $parts = (new UriPattern())
-      ->literal('/herp/')
-      ->string('foo')
-      ->getParts();
-    $path = (new UriBuilder($parts))
-      ->setString('foo', 'derp')
-      ->getPath();
-    expect($path)->toBeSame('/herp/derp');
-  }
+final class UriBuilderTest extends TestCase
+{
+    public function testLiteral(): void
+    {
+        $parts = (new UriPattern())
+            ->literal('/foo')
+            ->getParts();
 
-  public function testParameterAsFirstPart(): void {
-    $parts = (new UriPattern())
-      ->string('herp')
-      ->getParts();
-    $path = (new UriBuilder($parts))
-      ->setString('herp', 'derp')
-      ->getPath();
-    expect($path)->toBeSame('/derp');
-  }
+        self::assertSame('/foo', (new UriBuilder($parts))->getPath());
+    }
 
-  public function testIntParameter(): void {
-    $parts = (new UriPattern())
-      ->literal('/post/')
-      ->int('post_id')
-      ->getParts();
-    $path = (new UriBuilder($parts))
-      ->setInt('post_id', 123)
-      ->getPath();
-    expect($path)->toBeSame('/post/123');
-  }
+    public function testStringParameter(): void
+    {
+        $parts = (new UriPattern())
+            ->literal('/herp/')
+            ->string('foo')
+            ->getParts();
 
-  public function testEnumParameter(): void {
-    $parts = (new UriPattern())
-      ->enum(TestStringEnum::class, 'foo')
-      ->getParts();
-    $path = (new UriBuilder($parts))
-      ->setEnum(TestStringEnum::class, 'foo', TestStringEnum::BAR)
-      ->getPath();
-    expect($path)->toBeSame('/'.TestStringEnum::BAR);
-  }
+        $path = (new UriBuilder($parts))
+            ->setString('foo', 'derp')
+            ->getPath();
 
-  public function testIntAsString(): void {
-    expect(() ==> {
-      $parts = (new UriPattern())->int('foo')->getParts();
-      (new UriBuilder($parts))->setString('foo', 'bar');
-    })->toThrow(InvariantException::class);
-  }
+        self::assertSame('/herp/derp', $path);
+    }
 
-  public function testSetIncorrectEnumType(): void {
-    expect(() ==> {
-      $parts = (new UriPattern())
-        ->enum(TestStringEnum::class, 'foo')
-        ->getParts();
-      (new UriBuilder($parts))
-        ->setEnum(TestIntEnum::class, 'foo', TestIntEnum::BAR);
-    })->toThrow(InvariantException::class);
-  }
+    public function testParameterAsFirstPart(): void
+    {
+        $parts = (new UriPattern())
+            ->string('herp')
+            ->getParts();
 
-  public function testSetTwice(): void {
-    expect(() ==> {
-      $parts = (new UriPattern())->int('foo')->getParts();
-      (new UriBuilder($parts))
-        ->setInt('foo', 123)
-        ->setInt('foo', 123);
-    })->toThrow(InvariantException::class);
-  }
+        $path = (new UriBuilder($parts))
+            ->setString('herp', 'derp')
+            ->getPath();
 
-  public function testMissingValue(): void {
-    expect(() ==> {
-      $parts = (new UriPattern())->int('foo')->getParts();
-      (new UriBuilder($parts))->getPath();
-    })->toThrow(InvariantException::class);
-  }
+        self::assertSame('/derp', $path);
+    }
 
-  public function testSetInvalidParameter(): void {
-    expect(() ==> {
-      $parts = (new UriPattern())->int('foo')->getParts();
-      (new UriBuilder($parts))->setInt('bar', 123);
-    })->toThrow(InvariantException::class);
-  }
+    public function testIntParameter(): void
+    {
+        $parts = (new UriPattern())
+            ->literal('/post/')
+            ->int('post_id')
+            ->getParts();
+
+        $path = (new UriBuilder($parts))
+            ->setInt('post_id', 123)
+            ->getPath();
+
+        self::assertSame('/post/123', $path);
+    }
+
+    public function testIntAsString(): void
+    {
+        $parts = (new UriPattern())->int('foo')->getParts();
+        $this->expectException(InvariantViolationException::class);
+        (new UriBuilder($parts))->setString('foo', 'bar');
+    }
+
+    public function testSetTwice(): void
+    {
+        $parts = (new UriPattern())->int('foo')->getParts();
+
+        $this->expectException(InvariantViolationException::class);
+
+        (new UriBuilder($parts))
+            ->setInt('foo', 123)
+            ->setInt('foo', 123);
+    }
+
+    public function testMissingValue(): void
+    {
+        $parts = (new UriPattern())->int('foo')->getParts();
+        $this->expectException(InvariantViolationException::class);
+
+        (new UriBuilder($parts))->getPath();
+    }
+
+    public function testSetInvalidParameter(): void
+    {
+        $parts = (new UriPattern())->int('foo')->getParts();
+        $this->expectException(InvariantViolationException::class);
+
+        (new UriBuilder($parts))->setInt('bar', 123);
+    }
 }

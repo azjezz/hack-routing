@@ -1,266 +1,297 @@
-<?hh // strict
-/*
- *  Copyright (c) 2015-present, Facebook, Inc.
- *  All rights reserved.
- *
- *  This source code is licensed under the MIT license found in the
- *  LICENSE file in the root directory of this source tree.
- *
- */
+<?php
 
-namespace Facebook\HackRouter;
+declare(strict_types=1);
 
-use function Facebook\FBExpect\expect;
-use namespace HH\Lib\Dict;
-use type Facebook\HackRouter\Tests\TestRouter;
-use type Facebook\HackTest\DataProvider;
-use type Usox\HackTTP\{ServerRequestFactory, UriFactory};
-use type Facebook\Experimental\Http\Message\HTTPMethod;
+namespace HackRouting\Tests;
 
-final class RouterTest extends \Facebook\HackTest\HackTest {
-  const keyset<string> MAP = keyset[
-    '/foo',
-    '/foo/',
-    '/foo/bar',
-    '/foo/bar/{baz}',
-    '/foo/{bar}',
-    '/foo/{bar}/baz',
-    '/foo/{bar}{baz:.+}',
-    '/food/{noms}',
-    '/bar/{herp:\\d+}',
-    '/bar/{herp}',
-    '/unique/{foo}/bar',
-    '/optional_suffix_[foo]',
-    '/optional_suffix[/]',
-    '/optional_suffixes/[herp[/derp]]',
-    '/manual/en/{LegacyID}.php',
-  ];
+use HackRouting\BaseRouter;
+use HackRouting\HttpException\MethodNotAllowedException;
+use HackRouting\HttpException\NotFoundException;
+use HackRouting\HttpMethod;
+use HackRouting\IResolver;
+use HackRouting\PrefixMatchingResolver;
+use HackRouting\SimpleRegexpResolver;
+use HackRouting\Tests\Fixture\TestRouter;
+use PHPUnit\Framework\TestCase;
+use Psl\Dict;
 
-  public function expectedMatches(
-  ): varray<(string, string, dict<string, string>)> {
-    return varray[
-      tuple('/foo', '/foo', dict[]),
-      tuple('/foo/', '/foo/', dict[]),
-      tuple('/foo/bar', '/foo/bar', dict[]),
-      tuple('/foo/bar/herp', '/foo/bar/{baz}', dict['baz' => 'herp']),
-      tuple('/foo/herp', '/foo/{bar}', dict['bar' => 'herp']),
-      tuple('/foo/=%3Efoo', '/foo/{bar}', dict['bar' => '=>foo']),
-      tuple('/foo/herp/baz', '/foo/{bar}/baz', dict['bar' => 'herp']),
-      tuple(
-        '/foo/herp/derp',
+final class RouterTest extends TestCase
+{
+    /**
+     * @var list<non-empty-string>
+     */
+    private const MAP = [
+        '/foo',
+        '/foo/',
+        '/foo/bar',
+        '/foo/bar/{baz}',
+        '/foo/{bar}',
+        '/foo/{bar}/baz',
         '/foo/{bar}{baz:.+}',
-        dict['bar' => 'herp', 'baz' => '/derp'],
-      ),
-      tuple('/food/burger', '/food/{noms}', dict['noms' => 'burger']),
-      tuple('/bar/123', '/bar/{herp:\\d+}', dict['herp' => '123']),
-      tuple('/bar/derp', '/bar/{herp}', dict['herp' => 'derp']),
-      tuple('/bar/1derp', '/bar/{herp}', dict['herp' => '1derp']),
-      tuple('/unique/foo/bar', '/unique/{foo}/bar', dict['foo' => 'foo']),
-      tuple('/optional_suffix_', '/optional_suffix_[foo]', dict[]),
-      tuple('/optional_suffix_foo', '/optional_suffix_[foo]', dict[]),
-      tuple('/optional_suffix', '/optional_suffix[/]', dict[]),
-      tuple('/optional_suffix/', '/optional_suffix[/]', dict[]),
-      tuple('/optional_suffixes/', '/optional_suffixes/[herp[/derp]]', dict[]),
-      tuple(
-        '/optional_suffixes/herp',
+        '/food/{noms}',
+        '/bar/{herp:\\d+}',
+        '/bar/{herp}',
+        '/unique/{foo}/bar',
+        '/optional_suffix_[foo]',
+        '/optional_suffix[/]',
         '/optional_suffixes/[herp[/derp]]',
-        dict[],
-      ),
-      tuple(
-        '/optional_suffixes/herp/derp',
-        '/optional_suffixes/[herp[/derp]]',
-        dict[],
-      ),
-      tuple(
-        '/manual/en/foo.php',
         '/manual/en/{LegacyID}.php',
-        dict['LegacyID' => 'foo'],
-      ),
-      tuple(
-        '/manual/en/foo.bar.php',
-        '/manual/en/{LegacyID}.php',
-        dict['LegacyID' => 'foo.bar'],
-      ),
     ];
-  }
 
-  public function testCanGetExpatchedMatchesWithResolvers(): void {
-    $_ = $this->expectedMatchesWithResolvers();
-  }
-
-  public function getAllResolvers(
-  ): vec<
-    (
-      string,
-      (function(dict<HttpMethod, dict<string, string>>): IResolver<string>),
-    )
-  > {
-    return vec[
-      tuple('simple regexp', $map ==> new SimpleRegexpResolver($map)),
-      tuple(
-        'prefix matching',
-        $map ==> PrefixMatchingResolver::fromFlatMap($map),
-      ),
-    ];
-  }
-
-  public function expectedMatchesWithResolvers(
-  ): vec<(string, IResolver<string>, string, string, dict<string, string>)> {
-    $map = dict[HttpMethod::GET => dict(self::MAP)];
-    $resolvers = Dict\from_entries($this->getAllResolvers());
-
-    $out = vec[];
-    $examples = $this->expectedMatches();
-    foreach ($resolvers as $name => $resolver) {
-      $resolver = $resolver($map);
-      foreach ($examples as $ex) {
-        $out[] = tuple($name, $resolver, $ex[0], $ex[1], $ex[2]);
-      }
+    /**
+     * @return list<array{string, string, array<string, string>}>
+     */
+    public function expectedMatches(): array
+    {
+        return [
+            array('/foo', '/foo', []),
+            array('/foo/', '/foo/', []),
+            array('/foo/bar', '/foo/bar', []),
+            array('/foo/bar/herp', '/foo/bar/{baz}', ['baz' => 'herp']),
+            array('/foo/herp', '/foo/{bar}', ['bar' => 'herp']),
+            array('/foo/=%3Efoo', '/foo/{bar}', ['bar' => '=>foo']),
+            array('/foo/herp/baz', '/foo/{bar}/baz', ['bar' => 'herp']),
+            array(
+                '/foo/herp/derp',
+                '/foo/{bar}{baz:.+}',
+                ['bar' => 'herp', 'baz' => '/derp'],
+            ),
+            array('/food/burger', '/food/{noms}', ['noms' => 'burger']),
+            array('/bar/123', '/bar/{herp:\\d+}', ['herp' => '123']),
+            array('/bar/derp', '/bar/{herp}', ['herp' => 'derp']),
+            array('/bar/1derp', '/bar/{herp}', ['herp' => '1derp']),
+            array('/unique/foo/bar', '/unique/{foo}/bar', ['foo' => 'foo']),
+            array('/optional_suffix_', '/optional_suffix_[foo]', []),
+            array('/optional_suffix_foo', '/optional_suffix_[foo]', []),
+            array('/optional_suffix', '/optional_suffix[/]', []),
+            array('/optional_suffix/', '/optional_suffix[/]', []),
+            array('/optional_suffixes/', '/optional_suffixes/[herp[/derp]]', []),
+            array(
+                '/optional_suffixes/herp',
+                '/optional_suffixes/[herp[/derp]]',
+                [],
+            ),
+            array(
+                '/optional_suffixes/herp/derp',
+                '/optional_suffixes/[herp[/derp]]',
+                [],
+            ),
+            array(
+                '/manual/en/foo.php',
+                '/manual/en/{LegacyID}.php',
+                ['LegacyID' => 'foo'],
+            ),
+            array(
+                '/manual/en/foo.bar.php',
+                '/manual/en/{LegacyID}.php',
+                ['LegacyID' => 'foo.bar'],
+            ),
+        ];
     }
-    return $out;
-  }
 
-  <<DataProvider('getAllResolvers')>>
-  public function testMethodNotAllowedResponses(
-    string $_name,
-    (function(
-      dict<HttpMethod, dict<string, string>>,
-    ): IResolver<string>) $factory,
-  ): void {
-    $map = dict[
-      HttpMethod::GET => dict[
-        '/get' => 'get',
-      ],
-      HttpMethod::HEAD => dict[
-        '/head' => 'head',
-      ],
-      HttpMethod::POST => dict[
-        '/post' => 'post',
-      ],
-    ];
+    public function testCanGetExpectedMatchesWithResolvers(): void
+    {
+        $this->expectedMatchesWithResolvers();
 
-    $router = $this->getRouter()->setResolver($factory($map));
+        $this->addToAssertionCount(1);
+    }
 
-    // HEAD -> GET ( re-routing )
-    list($responder, $_data) = $router->routeMethodAndPath(
-      HttpMethod::HEAD,
-      '/get',
-    );
-    expect($responder)->toBeSame('get');
+    /**
+     * @return list<array{string, function(array<non-empty-string, array<string, string>>): IResolver<string>}>
+     */
+    public function getAllResolvers(): array
+    {
+        return [
+            array('simple regexp', fn($map) => new SimpleRegexpResolver($map)),
+            array(
+                'prefix matching',
+                fn($map) => PrefixMatchingResolver::fromFlatMap($map),
+            ),
+        ];
+    }
 
-    // GET -> HEAD
-    $e = expect(() ==> $router->routeMethodAndPath(HttpMethod::GET, '/head'))
-      ->toThrow(MethodNotAllowedException::class);
-    expect($e->getAllowedMethods())->toBeSame(keyset[HttpMethod::HEAD]);
+    /**
+     * @return list<array{string, IResolver<string>, string, string, array<string, string>}>
+     */
+    public function expectedMatchesWithResolvers(): array
+    {
+        $map = [HttpMethod::GET => Dict\associate(self::MAP, self::MAP)];
+        $resolvers = Dict\from_entries($this->getAllResolvers());
 
-    // HEAD -> POST
-    $e = expect(() ==> $router->routeMethodAndPath(HttpMethod::HEAD, '/post'))
-      ->toThrow(MethodNotAllowedException::class);
-    expect($e->getAllowedMethods())->toBeSame(keyset[HttpMethod::POST]);
+        $out = [];
+        $examples = $this->expectedMatches();
+        foreach ($resolvers as $name => $resolver) {
+            $resolver = $resolver($map);
+            foreach ($examples as $ex) {
+                $out[] = array($name, $resolver, $ex[0], $ex[1], $ex[2]);
+            }
+        }
+        return $out;
+    }
 
-    // GET -> POST
-    $e = expect(() ==> $router->routeMethodAndPath(HttpMethod::GET, '/post'))
-      ->toThrow(MethodNotAllowedException::class);
-    expect($e->getAllowedMethods())->toEqual(keyset[HttpMethod::POST]);
-  }
+    /**
+     * @dataProvider getAllResolvers
+     *
+     * @param (callable(array<non-empty-string, array<string, string >>): IResolver <string>) $factory
+     */
+    public function testMethodNotAllowedResponses(string $_name, callable $factory): void
+    {
+        $map = [
+            HttpMethod::GET => ['/get' => 'get'],
+            HttpMethod::HEAD => ['/head' => 'head'],
+            HttpMethod::POST => ['/post' => 'post'],
+        ];
 
-  <<DataProvider('expectedMatches')>>
-  public function testMatchesPattern(
-    string $in,
-    string $expected_responder,
-    dict<string, string> $expected_data,
-  ): void {
-    list($actual_responder, $actual_data) = $this->getRouter()
-      ->routeMethodAndPath(HttpMethod::GET, $in);
-    expect($actual_responder)->toBeSame($expected_responder);
-    expect(dict($actual_data))->toBeSame($expected_data);
-  }
+        $router = $this->getRouter($map)->setResolver($factory($map));
 
-  <<DataProvider('expectedMatchesWithResolvers')>>
-  public function testAllResolvers(
-    string $_resolver_name,
-    IResolver<string> $resolver,
-    string $in,
-    string $expected_responder,
-    dict<string, string> $expected_data,
-  ): void {
-    list($responder, $data) = $this->getRouter()
-      ->setResolver($resolver)
-      ->routeMethodAndPath(HttpMethod::GET, $in);
-    expect($responder)->toBeSame($expected_responder);
-    expect(dict($data))->toBeSame($expected_data);
+        // HEAD -> GET ( re-routing )
+        [$responder, $_data] = $router->routeMethodAndPath(HttpMethod::HEAD, '/get');
 
-    list($responder, $data) = $resolver->resolve(HttpMethod::GET, $in);
-    expect($responder)->toBeSame($expected_responder);
-    expect($data)->toBeSame(dict($data));
+        self::assertSame('get', $responder);
+        
+        // GET -> HEAD
+        try {
+            $router->routeMethodAndPath(HttpMethod::GET, '/head');
+            self::fail('GET -> HEAD');
 
-    list($responder, $data) = $this->getRouter()
-      ->setResolver($resolver)
-      ->routeMethodAndPath(HttpMethod::HEAD, $in);
-    expect($responder)->toBeSame($expected_responder);
-    expect(dict($data))->toBeSame($expected_data);
-  }
+        } catch (MethodNotAllowedException $e) {
+            self::assertSame([HttpMethod::HEAD], $e->getAllowedMethods());
+        }
 
-  <<DataProvider('expectedMatches')>>
-  public function testRequestResponseInterfacesSupport(
-    string $path,
-    string $_expected_responder,
-    dict<string, string> $_expected_data,
-  ): void {
-    $router = $this->getRouter();
-    list($direct_responder, $direct_data) = $router->routeMethodAndPath(
-      HttpMethod::GET,
-      $path,
-    );
+        // HEAD -> POST
+        try {
+            $router->routeMethodAndPath(HttpMethod::HEAD, '/post');
+            self::fail('HEAD -> POST');
 
-    expect($path[0])->toBeSame('/');
+        } catch (MethodNotAllowedException $e) {
+            self::assertSame([HttpMethod::POST], $e->getAllowedMethods());
+        }
 
-    $psr_request = (new ServerRequestFactory())->createServerRequest(
-      HTTPMethod::GET,
-      (new UriFactory())->createUri('http://example.com'.$path),
-      /* server params = */ dict[],
-    );
-    list($psr_responder, $psr_data) = $router->routeRequest($psr_request);
-    expect($psr_responder)->toBeSame($direct_responder);
-    expect($psr_data)->toBePHPEqual($direct_data);
-  }
+        // GET -> POST
+        try {
+            $router->routeMethodAndPath(HttpMethod::GET, '/post');
+            self::fail('GET -> POST');
 
-  <<DataProvider('getAllResolvers')>>
-  public function testNotFound(
-    string $_resolver_name,
-    (function(
-      dict<HttpMethod, dict<string, string>>,
-    ): IResolver<string>) $factory,
-  ): void {
-    $router = $this->getRouter()->setResolver($factory(dict[]));
-    expect(() ==> $router->routeMethodAndPath(HttpMethod::GET, '/__404'))
-      ->toThrow(NotFoundException::class);
+        } catch (MethodNotAllowedException $e) {
+            self::assertSame([HttpMethod::POST], $e->getAllowedMethods());
+        }
+    }
 
-    $router = $this->getRouter()
-      ->setResolver($factory(dict[
-        HttpMethod::GET => dict['/foo' => '/foo'],
-      ]));
-    expect(() ==> $router->routeMethodAndPath(HttpMethod::GET, '/__404'))
-      ->toThrow(NotFoundException::class);
-  }
 
-  public function testMethodNotAllowed(): void {
-    expect(() ==> {
-      $this->getRouter()->routeMethodAndPath(HttpMethod::POST, '/foo');
-    })->toThrow(\Facebook\HackRouter\MethodNotAllowedException::class);
-  }
+    /**
+     * @dataProvider expectedMatches
+     *
+     * @param array<string, string> $expected_data
+     */
+    public function testMatchesPattern(string $in, string $expected_responder, array $expected_data): void
+    {
+        [$actual_responder, $actual_data] = $this->getRouter()->routeMethodAndPath(HttpMethod::GET, $in);
 
-  public function testCovariantTResponder(): void {
-    $router = $this->getRouter();
-    $this->typecheckCovariantTResponder($router, $router);
-  }
+        self::assertSame($expected_data, $actual_data);
+        self::assertSame($expected_responder, $actual_responder);
+    }
 
-  private function typecheckCovariantTResponder(
-    BaseRouter<arraykey> $_,
-    BaseRouter<string> $_,
-  ): void {}
+    /**
+     * @dataProvider expectedMatchesWithResolvers
+     *
+     * @param IResolver<string> $resolver
+     * @param array<string, string> $expected_data
+     */
+    public function testAllResolvers(string $_resolver_name, IResolver $resolver, string $in, string $expected_responder, array $expected_data): void
+    {
+        [$responder, $data] = $this->getRouter()->setResolver($resolver)->routeMethodAndPath(HttpMethod::GET, $in);
 
-  private function getRouter(): TestRouter<string> {
-    return new TestRouter(dict(self::MAP));
-  }
+        self::assertSame($expected_responder, $responder);
+        self::assertSame($expected_data, $data);
+
+        [$responder, $data] = $resolver->resolve(HttpMethod::GET, $in);
+
+        self::assertSame($expected_responder, $responder);
+        self::assertSame($expected_data, $data);
+
+        [$responder, $data] = $this->getRouter()->setResolver($resolver)->routeMethodAndPath(HttpMethod::HEAD, $in);
+
+        self::assertSame($expected_responder, $responder);
+        self::assertSame($expected_data, $data);
+    }
+
+    /**
+     * @dataProvider expectedMatches
+     *
+     * @param array<string, string> $_expected_data
+     */
+    public function testRequestResponseInterfacesSupport(string $path, string $_expected_responder, array $_expected_data): void
+    {
+        $router = $this->getRouter();
+        [$direct_responder, $direct_data] = $router->routeMethodAndPath(HttpMethod::GET, $path);
+
+        self::assertSame('/', $path[0]);
+    }
+
+    /**
+     * @dataProvider getAllResolvers
+     *
+     * @param (callable(array<non-empty-string, array<string, string >>): IResolver <string>) $factory
+     */
+    public function testNotFoundEmpty(string $_resolver_name, callable $factory): void
+    {
+        $router = $this->getRouter()->setResolver($factory([]));
+
+        $this->expectException(NotFoundException::class);
+
+        $router->routeMethodAndPath(HttpMethod::GET, '/__404');
+    }
+
+    /**
+     * @dataProvider getAllResolvers
+     *
+     * @param (callable(array<non-empty-string, array<string, string >>): IResolver <string>) $factory
+     */
+    public function testNotFound(string $_resolver_name, callable $factory): void
+    {
+        $router = $this->getRouter()
+            ->setResolver($factory([HttpMethod::GET => ['/foo' => '/foo']]));
+
+        $this->expectException(NotFoundException::class);
+
+        $router->routeMethodAndPath(HttpMethod::GET, '/__404');
+    }
+
+    public function testMethodNotAllowed(): void
+    {
+        $this->expectException(MethodNotAllowedException::class);
+
+        $this->getRouter()->routeMethodAndPath(HttpMethod::POST, '/foo');
+    }
+
+    public function testCovariantTResponder(): void
+    {
+        $router = $this->getRouter();
+        $this->typecheckCovariantTResponder($router, $router);
+    }
+
+    /**
+     * @param BaseRouter<array-key> $_1
+     * @param BaseRouter<string> $_2
+     */
+    private function typeCheckCovariantTResponder(BaseRouter $_1, BaseRouter $_2): void
+    {
+        $this->addToAssertionCount(1);
+    }
+
+    /**
+     * @param null|array<non-empty-string, array<string, string>> $routes
+     * 
+     * @return TestRouter<string>
+     */
+    private function getRouter(?array $routes = null): TestRouter
+    {
+        if (null === $routes) {
+            $routes = [
+                HttpMethod::GET => Dict\associate(self::MAP, self::MAP)
+            ];
+        }
+
+        return new TestRouter($routes);
+    }
 }

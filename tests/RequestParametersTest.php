@@ -1,147 +1,118 @@
-<?hh // strict
-/*
- *  Copyright (c) 2015-present, Facebook, Inc.
- *  All rights reserved.
- *
- *  This source code is licensed under the MIT license found in the
- *  LICENSE file in the root directory of this source tree.
- *
- */
+<?php
 
-namespace Facebook\HackRouter;
+declare(strict_types=1);
 
-use type Facebook\HackRouter\Tests\{TestIntEnum, TestStringEnum};
-use function Facebook\FBExpect\expect;
+namespace HackRouting\Tests;
 
-final class RequestParametersTest extends \Facebook\HackTest\HackTest {
-  public function testStringParam(): void {
-    $parts = varray[new StringRequestParameter(
-      StringRequestParameterSlashes::WITHOUT_SLASHES,
-      'foo',
-    )];
-    $data = dict['foo' => 'bar'];
-    expect((new RequestParameters($parts, varray[], $data))->getString('foo'))
-      ->toBeSame('bar');
-  }
+use HackRouting\Parameter\IntRequestParameter;
+use HackRouting\Parameter\RequestParameters;
+use HackRouting\Parameter\StringRequestParameter;
+use HackRouting\UriPattern\UriPattern;
+use PHPUnit\Framework\TestCase;
+use Psl\Exception\InvariantViolationException;
 
-  public function testIntParam(): void {
-    $parts = varray[new IntRequestParameter('foo')];
-    $data = dict['foo' => '123'];
-    expect((new RequestParameters($parts, varray[], $data))->getInt('foo'))->toBeSame(
-      123,
-    );
-  }
+final class RequestParametersTest extends TestCase
+{
+    public function testStringParam(): void
+    {
+        $parts = [new StringRequestParameter(false, 'foo')];
 
-  public function testFetchingStringAsInt(): void {
-    expect(() ==> {
-      $parts = varray[new StringRequestParameter(
-        StringRequestParameterSlashes::WITHOUT_SLASHES,
-        'foo',
-      )];
-      $data = dict['foo' => 'bar'];
-      (new RequestParameters($parts, varray[], $data))->getInt('foo');
-    })->toThrow(InvariantException::class);
-  }
+        $data = ['foo' => 'bar'];
 
-  public function testEnumParam(): void {
-    $parts = varray[new EnumRequestParameter(TestIntEnum::class, 'foo')];
-    $data = dict['foo' => (string)TestIntEnum::BAR];
-    $value = (new RequestParameters($parts, varray[], $data))->getEnum(
-      TestIntEnum::class,
-      'foo',
-    );
-    expect($value)->toBeSame(TestIntEnum::BAR);
+        self::assertSame('bar', (new RequestParameters($parts, [], $data))->getString('foo'));
+    }
 
-    $typechecker_test = (TestIntEnum $_x) ==> {};
-    $typechecker_test($value);
-  }
+    public function testIntParam(): void
+    {
+        $parts = [new IntRequestParameter('foo')];
 
-  public function testEnumParamToUri(): void {
-    $part = (new EnumRequestParameter(TestIntEnum::class, 'foo'));
-    expect($part->getUriFragment(TestIntEnum::BAR))->toBeSame(
-      (string)TestIntEnum::BAR,
-    );
-  }
+        $data = ['foo' => '123'];
 
-  public function testInvalidEnumParamToUri(): void {
-    expect(() ==> {
-      $part = (new EnumRequestParameter(TestIntEnum::class, 'foo'));
-      /* HH_IGNORE_ERROR[4110] intentionally bad type */
-      $_throws = $part->getUriFragment(TestStringEnum::BAR);
-    })->toThrow(\UnexpectedValueException::class);
-  }
+        self::assertSame(123, (new RequestParameters($parts, [], $data))->getInt('foo'));
+    }
 
-  public function testFromPattern(): void {
-    $parts = (new UriPattern())
-      ->literal('/')
-      ->string('foo')
-      ->literal('/')
-      ->int('bar')
-      ->literal('/')
-      ->enum(TestIntEnum::class, 'baz')
-      ->getParameters();
-    $data = dict[
-      'foo' => 'some string',
-      'bar' => '123',
-      'baz' => (string)TestIntEnum::FOO,
-    ];
-    $params = new RequestParameters($parts, varray[], $data);
-    expect($params->getString('foo'))->toBeSame('some string');
-    expect($params->getInt('bar'))->toBeSame(123);
-    expect($params->getEnum(TestIntEnum::class, 'baz'))->toBeSame(
-      TestIntEnum::FOO,
-    );
-  }
+    public function testFetchingStringAsInt(): void
+    {
+        $parts = [new StringRequestParameter(false, 'foo')];
 
-  public function testGetOptional(): void {
-    $params = new RequestParameters(
-      varray[],
-      varray[new StringRequestParameter(
-        StringRequestParameterSlashes::WITHOUT_SLASHES,
-        'foo',
-      )],
-      dict['foo' => 'bar'],
-    );
-    expect($params->getOptionalString('foo'))->toBeSame('bar');
-  }
+        $data = ['foo' => 'bar'];
 
-  public function testGetMissingOptional(): void {
-    $params = new RequestParameters(
-      varray[],
-      varray[new StringRequestParameter(
-        StringRequestParameterSlashes::WITHOUT_SLASHES,
-        'foo',
-      )],
-      dict[],
-    );
-    expect($params->getOptionalString('foo'))->toBeSame(null);
-  }
+        $this->expectException(InvariantViolationException::class);
 
-  public function testGetOptionalAsRequired(): void {
-    expect(() ==> {
-      $params = new RequestParameters(
-        varray[],
-        varray[new StringRequestParameter(
-          StringRequestParameterSlashes::WITHOUT_SLASHES,
-          'foo',
-        )],
-        dict['foo' => 'bar'],
-      );
-      $params->getString('foo');
-    })->toThrow(InvariantException::class);
-  }
+        (new RequestParameters($parts, [], $data))->getInt('foo');
+    }
 
-  public function testGetRequiredAsOptional(): void {
-    expect(() ==> {
-      $params = new RequestParameters(
-        varray[new StringRequestParameter(
-          StringRequestParameterSlashes::WITHOUT_SLASHES,
-          'foo',
-        )],
-        varray[],
-        dict['foo' => 'bar'],
-      );
-      $params->getOptionalString('foo');
-    })->toThrow(InvariantException::class);
-  }
+    public function testFromPattern(): void
+    {
+        $parts = (new UriPattern())
+            ->literal('/')
+            ->string('foo')
+            ->literal('/')
+            ->int('bar')
+            ->literal('/')
+            ->getParameters();
+
+        $data = ['foo' => 'some string',
+            'bar' => '123',
+        ];
+
+        $params = new RequestParameters($parts, [], $data);
+
+        self::assertSame('some string', $params->getString('foo'));
+        self::assertSame(123, $params->getInt('bar'));
+    }
+
+    public function testGetOptional(): void
+    {
+        $params = new RequestParameters(
+            [],
+            [new StringRequestParameter(false, 'foo')],
+            ['foo' => 'bar'],
+        );
+
+        self::assertSame('bar', $params->getOptionalString('foo'));
+    }
+
+    public function testGetMissingOptional(): void
+    {
+        $params = new RequestParameters(
+            [],
+            [new StringRequestParameter(
+                false,
+                'foo',
+            )],
+            [],
+        );
+
+        self::assertNull($params->getOptionalString('foo'));
+    }
+
+    public function testGetOptionalAsRequired(): void
+    {
+        $params = new RequestParameters(
+            [],
+            [new StringRequestParameter(
+                false,
+                'foo',
+            )],
+            ['foo' => 'bar'],
+        );
+
+        $this->expectException(InvariantViolationException::class);
+
+        $params->getString('foo');
+    }
+
+    public function testGetRequiredAsOptional(): void
+    {
+        $params = new RequestParameters(
+            [new StringRequestParameter(false, 'foo')],
+            [],
+            ['foo' => 'bar'],
+        );
+
+        $this->expectException(InvariantViolationException::class);
+
+        $params->getOptionalString('foo');
+    }
 }

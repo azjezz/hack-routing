@@ -6,14 +6,16 @@ namespace HackRouting;
 
 use HackRouting\HttpException\NotFoundException;
 use HackRouting\PrefixMatching\PrefixMap;
-use Psl\{Dict, Iter, Str\Byte as Str, Type};
+use Psl\Dict;
+use Psl\Iter;
+use Psl\Str\Byte;
 use function is_string;
 use function preg_match;
 
 /**
- * @template-covariant TResponder
+ * @template TResponder
  *
- * @implements IResolver TResponder
+ * @implements IResolver<TResponder>
  */
 final class PrefixMatchingResolver implements IResolver
 {
@@ -43,6 +45,9 @@ final class PrefixMatchingResolver implements IResolver
     {
         return new self(Dict\map(
             $map,
+            /**
+             * @param array<string, Tr> $flat_map
+             */
             static fn(array $flat_map): PrefixMap => PrefixMap::fromFlatMap($flat_map)
         ));
     }
@@ -80,11 +85,11 @@ final class PrefixMatchingResolver implements IResolver
 
         $prefixes = $map->getPrefixes();
         if (!Iter\is_empty($prefixes)) {
-            $prefix_len = Str\length((string)Iter\first_key($prefixes));
-            $prefix = Str\slice($path, 0, $prefix_len);
+            $prefix_len = Byte\length((string)Iter\first_key($prefixes));
+            $prefix = Byte\slice($path, 0, $prefix_len);
             if (Iter\contains_key($prefixes, $prefix)) {
                 return $this->resolveWithMap(
-                    Str\strip_prefix($path, $prefix),
+                    Byte\strip_prefix($path, $prefix),
                     $prefixes[$prefix],
                 );
             }
@@ -97,9 +102,11 @@ final class PrefixMatchingResolver implements IResolver
             }
 
             $matched = $matches[0];
-            $remaining = Str\strip_prefix($path, $matched);
+            $remaining = Byte\strip_prefix($path, $matched);
 
-            $data = Dict\filter_keys($matches, static fn($key) => is_string($key));
+            /** @var array<string, string> $data */
+            $data = Dict\filter_keys($matches, static fn(int|string $key): bool => is_string($key));
+
             if ($sub->isResponder()) {
                 if ($remaining === '') {
                     return array($sub->getResponder(), $data);

@@ -3,8 +3,8 @@
 namespace HackRouting\UriPattern;
 
 /**
- * @require-implements UriBuilderWithPath
- * @require-extends UriBuilderBase
+ * @psalm-require-implements UriBuilderWithPath
+ * @psalm-require-extends UriBuilderBase
  */
 trait UriBuilderGetPath {
   final public function getPath(): string {

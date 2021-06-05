@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace HackRouting\UriPattern;
 
 /**
- * @require-implements HasUriPattern
+ * @psalm-require-implements HasUriPattern
  */
 trait GetUriBuilderFromUriPattern
 {

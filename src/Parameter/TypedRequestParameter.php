@@ -7,12 +7,12 @@ namespace HackRouting\Parameter;
 /**
  * @template T
  *
- * @require-extends RequestParameter
+ * @psalm-require-extends RequestParameter
  */
 interface TypedRequestParameter
 {
     /**
      * @return T
      */
-    public function assert(string $value): mixed;
+    public function assert(string $input): mixed;
 }

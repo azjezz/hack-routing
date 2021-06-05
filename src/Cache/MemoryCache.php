@@ -8,6 +8,9 @@ use HackRouting\PrefixMatching\PrefixMap;
 
 final class MemoryCache implements CacheInterface
 {
+    /**
+     * @var array<string, array<non-empty-string, PrefixMap>>
+     */
     private array $cache = [];
 
     /**
@@ -19,6 +22,7 @@ final class MemoryCache implements CacheInterface
      */
     public function fetch(string $item, callable $factory): array
     {
+        /** @var array<non-empty-string, PrefixMap<T>> */
         return $this->cache[$item] ?? ($this->cache[$item] = $factory());
     }
 }

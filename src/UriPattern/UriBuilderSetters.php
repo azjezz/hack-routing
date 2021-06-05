@@ -8,7 +8,7 @@ use HackRouting\Parameter\IntRequestParameter;
 use HackRouting\Parameter\StringRequestParameter;
 
 /**
- * @require-extends UriBuilderBase
+ * @psalm-require-extends UriBuilderBase
  */
 trait UriBuilderSetters {
   final public function setString(string $name, string $value): static {

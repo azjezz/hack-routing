@@ -18,17 +18,20 @@ use Psl\Str;
 final class BaseRouterExample extends BaseRouter
 {
     /**
-     * @return iterable<non-empty-string, iterable<string, (function(array<string, string>):string)>>
+     * @return array<non-empty-string, array<string, (function(array<string, string>):string)>>
      */
-    protected function getRoutes(): iterable
+    protected function getRoutes(): array
     {
-        yield HttpMethod::GET => [
-            '/' => fn ($_params): string => 'Hello, world',
-            '/user/{user_name}' => fn (array $params): string => 'Hello, ' . $params['user_name'],
-        ];
+        return [
+            HttpMethod::GET => [
+                '/' => fn($_params): string => 'Hello, world',
+                '/user/settings' => fn($_params): string => 'User settings!',
+                '/user/{user_name}' => fn(array $params): string => 'Hello, ' . $params['user_name'],
+            ],
 
-        yield HttpMethod::POST => [
-            '/' => fn ($_params) => 'Hello, POST world',
+            HttpMethod::POST => [
+                '/' => fn($_params) => 'Hello, POST world',
+            ],
         ];
     }
 }
@@ -55,7 +58,6 @@ function get_example_inputs(): iterable
         $method = Str\pad_right(Str\format('[%s]', $method), 8);
         $request = Str\pad_right(Str\format('%s %s', $method, $path), 25);
         $output->write(Str\format("%s -> %s\n", $request, $responder($params)));
-    }
 
-    exit(0);
+    }
 })();
