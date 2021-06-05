@@ -106,6 +106,7 @@ final class PrefixMap
                 } else {
                     $prefixes[] = [$node->getText(), $nodes, $responder];
                 }
+
                 continue;
             }
 
@@ -118,6 +119,7 @@ final class PrefixMap
                     }
                 }
             }
+
             $regexps[] = [
                 Str\join(Vec\map(
                     Vec\concat([$node], $nodes),
@@ -199,6 +201,8 @@ final class PrefixMap
                 null,
             );
         }
+
+        // optimize prefixes[/foo] -> regexps[
 
         return new self($literals, $prefixes, $regexps);
     }

@@ -22,12 +22,14 @@ final class Parser
         $tokens = tokenize($pattern);
 
         [$node, $tokens] = self::parseImpl($tokens);
-        Psl\invariant(Iter\is_empty($tokens), 'Tokens remaining at end of expression: %s', var_export($tokens, true));
+
+        Psl\invariant($tokens === [], 'Tokens remaining at end of expression: %s', var_export($tokens, true));
+
         return $node;
     }
 
     /**
-     * @param list<Token> $tokens
+     * @param array<array-key, Token> $tokens
      *
      * @return array{PatternNode, list<Token>}
      */
@@ -35,13 +37,12 @@ final class Parser
     {
         $nodes = [];
 
-        while (!Iter\is_empty($tokens)) {
-            /** @var Token $token */
+        while ($tokens) {
             $token = Iter\first($tokens);
             $type = $token->getType();
             $text = $token->getValue();
 
-            $tokens = Vec\values(Dict\drop($tokens, 1));
+            $tokens = Dict\drop($tokens, 1);
 
             if ($type === Token::TYPE_OPEN_BRACE) {
                 [$node, $tokens] = self::parseParameter($tokens);
@@ -56,7 +57,7 @@ final class Parser
                     Token::TYPE_OPEN_BRACE,
                     Token::TYPE_CLOSE_BRACE,
                 );
-                $tokens = Vec\values(Dict\drop($tokens, 1));
+                $tokens = Dict\drop($tokens, 1);
                 continue;
             }
 
@@ -73,13 +74,12 @@ final class Parser
                     Token::TYPE_OPEN_BRACKET,
                     Token::TYPE_CLOSE_BRACKET,
                 );
-                $tokens = Vec\values(Dict\drop($tokens, 1));
+                $tokens = Dict\drop($tokens, 1);
                 continue;
             }
 
             if ($type === Token::TYPE_CLOSE_BRACKET) {
-                $tokens = Vec\concat([new Token($type, $text)], $tokens);
-                return array(new PatternNode($nodes), $tokens);
+                return array(new PatternNode($nodes), Vec\concat([new Token($type, $text)], $tokens));
             }
 
             Psl\invariant(
@@ -90,15 +90,15 @@ final class Parser
             $nodes[] = new LiteralNode($text);
         }
 
-        return array(new PatternNode($nodes), $tokens);
+        return array(new PatternNode($nodes), Vec\values($tokens));
     }
 
     /**
-     * @param list<Token> $tokens
+     * @param array<array-key, Token> $tokens
      *
      * @return array{ParameterNode, list<Token>}
      */
-    private static function parseParameter(array $tokens): array
+    private static function parseParameter(iterable $tokens): array
     {
         /**
          * @var Token $token
@@ -111,14 +111,14 @@ final class Parser
         );
 
         $name = $token->getValue();
-        $tokens = Vec\values(Dict\drop($tokens, 1));
+        $tokens = Dict\drop($tokens, 1);
 
         /**
          * @var Token $token
          */
         $token = Iter\first($tokens);
         if ($token->getType() === Token::TYPE_CLOSE_BRACE) {
-            return [new ParameterNode($name, null), $tokens];
+            return [new ParameterNode($name, null), Vec\values($tokens)];
         }
 
         Psl\invariant(
@@ -130,13 +130,10 @@ final class Parser
             $token->toString(),
         );
 
-        $tokens = Vec\values(Dict\drop($tokens, 1));
+        $tokens = Dict\drop($tokens, 1);
         $regexp = '';
         $depth = 0;
-        while (!Iter\is_empty($tokens)) {
-            /**
-             * @var Token $token
-             */
+        while ($tokens) {
             $token = Iter\first($tokens);
             if ($token->getType() === Token::TYPE_OPEN_BRACE) {
                 ++$depth;
@@ -146,7 +143,8 @@ final class Parser
                 }
                 --$depth;
             }
-            $tokens = Vec\values(Dict\drop($tokens, 1));
+
+            $tokens = Dict\drop($tokens, 1);
             $regexp .= $token->getValue();
         }
 
@@ -157,6 +155,6 @@ final class Parser
             Token::TYPE_CLOSE_BRACE
         );
 
-        return [new ParameterNode($name, $regexp), $tokens];
+        return [new ParameterNode($name, $regexp), Vec\values($tokens)];
     }
 }

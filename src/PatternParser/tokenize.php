@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace HackRouting\PatternParser;
 
-use Psl\Str\Byte as Str;
+use Psl\Str\Byte;
 use Psl\Vec;
 
 /**
@@ -14,7 +14,7 @@ function tokenize(string $pattern): array
 {
     $tokens = [];
     $buffer = '';
-    foreach (Str\chunk($pattern) as $byte) {
+    foreach (Byte\chunk($pattern) as $byte) {
         if (Token::isValidType($byte)) {
             $tokens[] = new Token(Token::TYPE_STRING, $buffer);
             $buffer = '';

@@ -80,12 +80,12 @@ final class PrefixMatchingResolver implements IResolver
     private function resolveWithMap(string $path, PrefixMap $map): array
     {
         $literals = $map->getLiterals();
-        if (Iter\contains_key($literals, $path)) {
-            return array($literals[$path], []);
+        if (isset($literals[$path])) {
+            return [$literals[$path], []];
         }
 
         $prefixes = $map->getPrefixes();
-        if (!Iter\is_empty($prefixes)) {
+        if ($prefixes) {
             $prefix_len = Byte\length((string)Iter\first_key($prefixes));
             $prefix = Byte\slice($path, 0, $prefix_len);
             if (Iter\contains_key($prefixes, $prefix)) {
@@ -114,6 +114,7 @@ final class PrefixMatchingResolver implements IResolver
                 }
                 continue;
             }
+
             try {
                 [$responder, $sub_data] = $this->resolveWithMap($remaining, $sub->getMap());
             } catch (NotFoundException) {
