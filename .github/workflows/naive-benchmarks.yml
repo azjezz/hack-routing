@@ -44,4 +44,4 @@ jobs:
         run: "composer install --no-interaction --no-progress --ignore-platform-req php"
 
       - name: "running naive benchmarks"
-        run: "php -dopcache.jit=1235 -dopcache.enable_cli=yes -dopcache.enable=yes -dapc.enable=1 -dapc.enable_cli=1 bin/naive-benchmark.php"
+        run: php "-dopcache.jit=1235" "-dopcache.enable_cli=yes" "-dopcache.enable=yes" "-dapc.enable=1" "-dapc.enable_cli=1" bin/naive-benchmark.php

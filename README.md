@@ -12,9 +12,10 @@ HTTP Exceptions
 ---------------
 
 Exception classes representing common situations in HTTP applications:
- - `InternalServerError`
- - `MethodNotAllowed`
- - `NotFoundException`
+
+- `HackRouting\HttpException\InternalServerError`
+- `HackRouting\HttpException\MethodNotAllowed`
+- `HackRouting\HttpException\NotFoundException`
 
 BaseRouter
 ----------
@@ -37,32 +38,30 @@ use HackRouting\HttpMethod;
  */
 final class BaseRouterExample extends BaseRouter {
   /**
-   * @return iterable<non-empty-string, iterable<string, (function(ImmMap<string, string>):string)>>
+   * @return array<non-empty-string, array<string, (function(ImmMap<string, string>):string)>>
    */
-  protected function getRoutes(): iterable {
-    yield HttpMethod::GET => [
-      '/' =>
-         fn($parameters): string => 'Hello, World!',
+  protected function getRoutes(): array {
+    return [
+      HttpMethod::GET => [
+        '/' => static fn($parameters): string => 'Hello, World!',
+        '/user/{username}/' => static fn($parameters): string => Str\format('Hello, %s!', $parameters['username']),
+      ],
 
-      '/user/{username}/' =>
-         fn($parameters): string => Str\format('Hello, %s!', $parameters['username']),
-    ];
-
-    yield HttpMethod::POST => [
-      '/' =>
-         fn($parameters): string => 'Hello, POST world',
+      HttpMethod::POST => [
+        '/' => static fn($parameters): string => 'Hello, POST world',
+      ],
     ];
   }
 }
 ```
 
-Simplified for conciseness - see [`examples/BaseRouterExample.php`](examples/BaseRouterExample.php) for full executable example.
+Simplified for conciseness - see [`examples/BaseRouterExample.php`](examples/BaseRouterExample.php) for full executable
+example.
 
 UriPatterns
 -----------
 
-Generate FastRoute fragments, URIs (for linking), and retrieve URI parameters
-in a consistent and type-safe way:
+Generate FastRoute fragments, URIs (for linking), and retrieve URI parameters in a consistent and type-safe way:
 
 ```php
 <?php
@@ -80,8 +79,7 @@ final class UserPageController extends WebController {
 }
 ```
 
-Parameters can be retrieved, with types checked at runtime both against the
-values, and the definition:
+Parameters can be retrieved, with types checked at runtime both against the values, and the definition:
 
 ```php
 public function getResponse(): string {
@@ -97,7 +95,8 @@ $link = UserPageController::getUriBuilder()
   ->getPath();
 ```
 
-These examples are simplified for conciseness - see [`examples/UriPatternsExample.php`](examples/UriPatternsExample.php) for full executable example.
+These examples are simplified for conciseness - see [`examples/UriPatternsExample.php`](examples/UriPatternsExample.php)
+for full executable example.
 
 Contributing
 ============
