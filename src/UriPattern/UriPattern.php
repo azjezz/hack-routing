@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace HackRouting\UriPattern;
 
+use HackRouting\Parameter\EnumRequestParameter;
 use HackRouting\Parameter\IntRequestParameter;
 use HackRouting\Parameter\StringRequestParameter;
 use HackRouting\Parameter\UriParameter;
@@ -25,7 +26,7 @@ class UriPattern implements HasRouteFragment
 
     final public function getRouteFragment(): string
     {
-        $fragments = Vec\map($this->parts, fn (UriPatternPart $part): string => $part->getRouteFragment());
+        $fragments = Vec\map($this->parts, fn(UriPatternPart $part): string => $part->getRouteFragment());
 
         return Str\join($fragments, '');
     }
@@ -79,5 +80,13 @@ class UriPattern implements HasRouteFragment
     final public function int(string $name): static
     {
         return $this->appendPart(new IntRequestParameter($name));
+    }
+
+    /**
+     * @param non-empty-list<non-empty-string> $values
+     */
+    final public function enum(string $name, array $values): static
+    {
+        return $this->appendPart(new EnumRequestParameter($name, $values));
     }
 }

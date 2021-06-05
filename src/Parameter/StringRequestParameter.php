@@ -28,6 +28,9 @@ final class StringRequestParameter extends TypedUriParameter
         return $input;
     }
 
+    /**
+     * @return null|non-empty-string
+     */
     public function getRegExpFragment(): ?string
     {
         if (!$this->allow_slashes) {

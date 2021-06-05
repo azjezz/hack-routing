@@ -7,7 +7,6 @@ namespace HackRouting\UriPattern;
 use Psl;
 use Psl\Iter;
 use Psl\Str;
-use Psl\Type;
 use Psl\Vec;
 use HackRouting\Parameter\RequestParameter;
 use HackRouting\Parameter\TypedUriParameter;

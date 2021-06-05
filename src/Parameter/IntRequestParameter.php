@@ -16,7 +16,10 @@ final class IntRequestParameter extends TypedUriParameter
         return Type\int()->coerce($input);
     }
 
-    public function getRegExpFragment(): ?string
+    /**
+     * @return non-empty-string
+     */
+    public function getRegExpFragment(): string
     {
         return '\d+';
     }

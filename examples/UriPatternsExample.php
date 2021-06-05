@@ -10,6 +10,7 @@ require_once(__DIR__ . '/../vendor/autoload.php');
 
 use HackRouting\AbstractMatcher;
 use HackRouting\Cache\FileCache;
+use HackRouting\Cache\MemoryCache;
 use HackRouting\HttpMethod;
 use HackRouting\Parameter\RequestParameters;
 use HackRouting\UriPattern\GetRoutePatternFromUriPattern;
@@ -77,6 +78,27 @@ final class UserPageController extends WebController
     }
 }
 
+final class PageController extends WebController
+{
+    public static function getUriPattern(): UriPattern
+    {
+        return (new UriPattern())
+            ->slash()
+            ->enum('page', ['about', 'contact'])
+            ->literal('-us');
+    }
+
+    public function getResponse(): string
+    {
+        $parameters = $this->getRequestParameters();
+        if ($parameters->getEnum('page') === 'about') {
+            return 'Learn more about us.';
+        }
+
+        return 'Contact us';
+    }
+}
+
 /**
  * @extends BaseRouter<class-string<WebController>>
  */
@@ -90,6 +112,7 @@ final class UriPatternsExample extends AbstractMatcher
         return [
             HomePageController::class,
             UserPageController::class,
+            PageController::class
         ];
     }
 
@@ -116,13 +139,15 @@ final class UriPatternsExample extends AbstractMatcher
  */
 function get_example_paths(): iterable
 {
-    yield HomePageController::getUriBuilder()->getPath();
-    yield UserPageController::getUriBuilder()->setString('user_name', 'Mr Hankey')->getPath();
+    yield HomePageController::getUriBuilder()->getPath(); // "/"
+    yield UserPageController::getUriBuilder()->setString('user_name', 'Mr Hankey')->getPath(); // "/users/Mr Hankey"
+    yield PageController::getUriBuilder()->setEnum('page', 'about')->getPath(); // "/about-us"
+    yield PageController::getUriBuilder()->setEnum('page', 'contact')->getPath(); // "/contact-us"
 }
 
 (static function (): void {
     $output = IO\output_handle();
-    $router = new UriPatternsExample(new FileCache());
+    $router = new UriPatternsExample(new MemoryCache());
     foreach (get_example_paths() as $path) {
         [$controller, $params] = $router->match(
             HttpMethod::GET,

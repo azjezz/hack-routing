@@ -32,4 +32,29 @@ trait RequestParameterGetters
         /** @var int|null */
         return $this->getSimpleTypedOptional(IntRequestParameter::class, $name);
     }
+
+    /**
+     * @return non-empty-string
+     */
+    final public function getEnum(string $name): string
+    {
+        $spec = $this->getRequiredSpec(EnumRequestParameter::class, $name);
+        $value = $this->values[$name];
+
+        return $spec->assert($value);
+    }
+
+    /**
+     * @return null|non-empty-string
+     */
+    final public function getOptionalEnum(string $name): ?string
+    {
+        $spec = $this->getOptionalSpec(EnumRequestParameter::class, $name);
+        $value = $this->values[$name] ?? null;
+        if (null === $value) {
+            return null;
+        }
+
+        return $spec->assert($value);
+    }
 }
