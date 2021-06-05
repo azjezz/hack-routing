@@ -6,4 +6,6 @@ namespace HackRouting\HttpException;
 
 use Exception;
 
-abstract class HttpException extends Exception {}
+abstract class HttpException extends Exception
+{
+}

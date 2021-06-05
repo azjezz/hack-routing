@@ -9,6 +9,7 @@ use HackRouting\PrefixMatching\PrefixMap;
 use Psl\Dict;
 use Psl\Iter;
 use Psl\Str\Byte;
+
 use function is_string;
 use function preg_match;
 
@@ -48,7 +49,7 @@ final class PrefixMatchingResolver implements IResolver
             /**
              * @param array<string, Tr> $flat_map
              */
-            static fn(array $flat_map): PrefixMap => PrefixMap::fromFlatMap($flat_map)
+            static fn (array $flat_map): PrefixMap => PrefixMap::fromFlatMap($flat_map)
         ));
     }
 
@@ -73,7 +74,7 @@ final class PrefixMatchingResolver implements IResolver
      * @param PrefixMap<TResponder> $map
      *
      * @return array{0: TResponder, array<string, string>}
-     * 
+     *
      * @throws NotFoundException
      */
     private function resolveWithMap(string $path, PrefixMap $map): array
@@ -105,7 +106,7 @@ final class PrefixMatchingResolver implements IResolver
             $remaining = Byte\strip_prefix($path, $matched);
 
             /** @var array<string, string> $data */
-            $data = Dict\filter_keys($matches, static fn(int|string $key): bool => is_string($key));
+            $data = Dict\filter_keys($matches, static fn (int|string $key): bool => is_string($key));
 
             if ($sub->isResponder()) {
                 if ($remaining === '') {

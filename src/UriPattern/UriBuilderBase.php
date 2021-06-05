@@ -82,14 +82,13 @@ abstract class UriBuilderBase
         string $parameter_type,
         string $name,
         mixed $value,
-    ): static
-    {
+    ): static {
         $part = $this->parameters[$name] ?? null;
         Psl\invariant(
             $part !== null,
             '%s is not a valid parameter - expected one of [%s]',
             $name,
-            Str\join(Vec\map(Vec\keys($this->parameters), fn(string $x): string => "'" . $x . "'"), ', '),
+            Str\join(Vec\map(Vec\keys($this->parameters), fn (string $x): string => "'" . $x . "'"), ', '),
         );
 
         /** @var TypedUriParameter<T> $part */
@@ -100,7 +99,7 @@ abstract class UriBuilderBase
             $parameter_type,
             $part::class,
         );
-    
+
         Psl\invariant(
             !Iter\contains_key($this->values, $name),
             'trying to set %s twice',

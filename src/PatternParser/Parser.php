@@ -8,6 +8,7 @@ use Psl;
 use Psl\Dict;
 use Psl\Iter;
 use Psl\Vec;
+
 use function var_export;
 
 final class Parser
@@ -134,7 +135,7 @@ final class Parser
             $token = Iter\first($tokens);
             if ($token->getType() === Token::TYPE_OPEN_BRACE) {
                 ++$depth;
-            } else if ($token->getType() === Token::TYPE_CLOSE_BRACE) {
+            } elseif ($token->getType() === Token::TYPE_CLOSE_BRACE) {
                 if ($depth === 0) {
                     break;
                 }

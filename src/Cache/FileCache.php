@@ -37,7 +37,7 @@ final class FileCache implements CacheInterface
         if (Filesystem\exists($file)) {
             /**
              * @psalm-suppress UnresolvableInclude
-             * @var array<non-empty-string, PrefixMap<T>> $result 
+             * @var array<non-empty-string, PrefixMap<T>> $result
              */
             $result = require $file;
         } else {

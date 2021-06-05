@@ -10,16 +10,19 @@ use HackRouting\Parameter\StringRequestParameter;
 /**
  * @psalm-require-extends UriBuilderBase
  */
-trait UriBuilderSetters {
-  final public function setString(string $name, string $value): static {
-    return $this->setValue(StringRequestParameter::class, $name, $value);
-  }
+trait UriBuilderSetters
+{
+    final public function setString(string $name, string $value): static
+    {
+        return $this->setValue(StringRequestParameter::class, $name, $value);
+    }
 
-  final public function setInt(string $name, int $value): static {
-    return $this->setValue(IntRequestParameter::class, $name, $value);
-  }
+    final public function setInt(string $name, int $value): static
+    {
+        return $this->setValue(IntRequestParameter::class, $name, $value);
+    }
 
-  // final public function setEnum<T>(
+    // final public function setEnum<T>(
   //   /* HH_FIXME[2053] */ classname<\HH\BuiltinEnum<T>> $class,
   //   string $name,
   //   T $value,

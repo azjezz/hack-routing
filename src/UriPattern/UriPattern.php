@@ -25,7 +25,7 @@ class UriPattern implements HasFastRouteFragment
 
     final public function getFastRouteFragment(): string
     {
-        $fragments = Vec\map($this->parts, fn(UriPatternPart $part): string => $part->getFastRouteFragment());
+        $fragments = Vec\map($this->parts, fn (UriPatternPart $part): string => $part->getFastRouteFragment());
 
         return Str\join($fragments, '');
     }

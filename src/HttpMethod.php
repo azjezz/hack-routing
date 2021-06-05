@@ -4,8 +4,11 @@ declare(strict_types=1);
 
 namespace HackRouting;
 
-final class HttpMethod {
-    private function __construct() {}
+final class HttpMethod
+{
+    private function __construct()
+    {
+    }
 
     public const HEAD = 'HEAD';
     public const GET = 'GET';

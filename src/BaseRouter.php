@@ -2,7 +2,9 @@
 
 namespace HackRouting;
 
-use Psl\{Dict, Iter, Vec};
+use Psl\Dict;
+use Psl\Iter;
+use Psl\Vec;
 use HackRouting\Cache\CacheInterface;
 use HackRouting\Cache\NullCache;
 use HackRouting\HttpException\MethodNotAllowedException;
@@ -45,7 +47,7 @@ abstract class BaseRouter
         $resolver = $this->getResolver();
         try {
             [$responder, $data] = $resolver->resolve($method, $path);
-            $data = Dict\map($data, static fn(string $value): string => rawurldecode($value));
+            $data = Dict\map($data, static fn (string $value): string => rawurldecode($value));
             return [$responder, $data];
         } catch (NotFoundException $e) {
             $allowed = $this->getAllowedMethods($path);
@@ -55,7 +57,7 @@ abstract class BaseRouter
 
             if ($method === HttpMethod::HEAD && $allowed === [HttpMethod::GET]) {
                 [$responder, $data] = $resolver->resolve(HttpMethod::GET, $path);
-                $data = Dict\map($data, static fn(string $value): string => rawurldecode($value));
+                $data = Dict\map($data, static fn (string $value): string => rawurldecode($value));
                 return [$responder, $data];
             }
 
@@ -94,13 +96,13 @@ abstract class BaseRouter
             return $this->resolver;
         }
 
-        $routes = $this->cache->fetch(__FILE__, function(): array {
+        $routes = $this->cache->fetch(__FILE__, function (): array {
             return Dict\map(
                 $this->getRoutes(),
                 /**
                  * @param array<string, TResponder> $method_routes
                  */
-                static fn(array $method_routes): PrefixMatching\PrefixMap => PrefixMatching\PrefixMap::fromFlatMap($method_routes),
+                static fn (array $method_routes): PrefixMatching\PrefixMap => PrefixMatching\PrefixMap::fromFlatMap($method_routes),
             );
         });
 

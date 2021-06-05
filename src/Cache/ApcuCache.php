@@ -22,7 +22,7 @@ final class ApcuCache implements CacheInterface
      * @return array<non-empty-string, PrefixMap<T>>
      */
     public function fetch(string $item, callable $factory): array
-    {         
+    {
         /** @var false|array<non-empty-string, PrefixMap<T>> $result */
         $result = apcu_fetch($item, $success);
         if ($success && false !== $result) {

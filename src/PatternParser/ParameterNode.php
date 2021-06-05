@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace HackRouting\PatternParser;
 
 use Psl\Str;
+
 use function preg_quote;
 
 final class ParameterNode implements Node

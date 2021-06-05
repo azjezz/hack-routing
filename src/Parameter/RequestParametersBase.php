@@ -41,13 +41,13 @@ abstract class RequestParametersBase
         $spec_vector_to_map =
             /**
              * @param iterable<RequestParameter> $specs
-             * 
+             *
              * @return array<string, RequestParameter>
              */
-            static fn(iterable $specs) => Dict\pull(
+            static fn (iterable $specs) => Dict\pull(
                 $specs,
-                static fn(RequestParameter $it): RequestParameter => $it,
-                static fn(RequestParameter $it): string => $it->getName()
+                static fn (RequestParameter $it): RequestParameter => $it,
+                static fn (RequestParameter $it): string => $it->getName()
             );
 
         $this->requiredSpecs = $spec_vector_to_map($required_specs);
@@ -117,7 +117,7 @@ abstract class RequestParametersBase
     {
         $spec = $this->getRequiredSpec($class, $name);
         $value = $this->values[$name];
-        
+
         return $spec->assert($value);
     }
 

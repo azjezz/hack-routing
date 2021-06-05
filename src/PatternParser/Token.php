@@ -15,7 +15,7 @@ final class Token
     public const TYPE_CLOSE_BRACE = '}';
     public const TYPE_OPEN_BRACKET = '[';
     public const TYPE_CLOSE_BRACKET = ']';
-    
+
     private const TYPES = [self::TYPE_STRING, self::TYPE_COLON, self::TYPE_OPEN_BRACE, self::TYPE_CLOSE_BRACE, self::TYPE_OPEN_BRACKET, self::TYPE_CLOSE_BRACKET];
 
     /**
@@ -42,7 +42,7 @@ final class Token
     {
         return $this->value;
     }
-    
+
     public function toString(): string
     {
         return Str\format('"%s" (%s)', $this->value, $this->type);

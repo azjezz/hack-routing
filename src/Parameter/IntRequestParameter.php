@@ -9,12 +9,15 @@ use Psl\Type;
 /**
  * @extends TypedUriParameter<int>
  */
-final class IntRequestParameter extends TypedUriParameter  {
-  public function assert(string $input): int {
-      return Type\int()->coerce($input);
-  }
+final class IntRequestParameter extends TypedUriParameter
+{
+    public function assert(string $input): int
+    {
+        return Type\int()->coerce($input);
+    }
 
-  public function getRegExpFragment(): ?string {
-    return '\d+';
-  }
+    public function getRegExpFragment(): ?string
+    {
+        return '\d+';
+    }
 }

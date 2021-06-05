@@ -18,8 +18,7 @@ final class PrefixMapOrResponder
     public function __construct(
         private ?PrefixMap $map,
         private mixed $responder,
-    )
-    {
+    ) {
         Psl\invariant(
             ($map === null) !== ($responder === null),
             'Must specify map *or* responder',

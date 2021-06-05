@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace HackRouting;
 
-use Psl\{Dict, Iter, Type};
+use Psl\Dict;
+use Psl\Iter;
+use Psl\Type;
 use HackRouting\HttpException\NotFoundException;
 
 /**
@@ -31,9 +33,9 @@ final class SimpleRegexpResolver implements IResolver
              *
              * @return array<string, TResponder>
              */
-            static fn(array $routes): array => Dict\map_keys(
+            static fn (array $routes): array => Dict\map_keys(
                 $routes,
-                static fn(string $route): string => self::fastRouteToRegexp($route),
+                static fn (string $route): string => self::fastRouteToRegexp($route),
             ),
         );
     }
@@ -57,7 +59,7 @@ final class SimpleRegexpResolver implements IResolver
                 continue;
             }
 
-            $parameters = Dict\filter_keys($matches, static fn(mixed $key): bool => Type\string()->matches($key));
+            $parameters = Dict\filter_keys($matches, static fn (mixed $key): bool => Type\string()->matches($key));
             $parameters = Type\dict(Type\string(), Type\string())->coerce($parameters);
 
             return [$responder, $parameters];

@@ -4,27 +4,29 @@ declare(strict_types=1);
 
 namespace HackRouting\PatternParser;
 
-use Psl\{Str\Byte as Str, Vec};
+use Psl\Str\Byte as Str;
+use Psl\Vec;
 
 /**
  * @return list<Token>
  */
-function tokenize(string $pattern): array {
-  $tokens = [];
-  $buffer = '';
-  foreach (Str\chunk($pattern) as $byte) {
-    if (Token::isValidType($byte)) {
-        $tokens[] = new Token(Token::TYPE_STRING, $buffer);
-        $buffer = '';
-        $tokens[] = new Token($byte, $byte);
-    } else {
-      $buffer .= $byte;
+function tokenize(string $pattern): array
+{
+    $tokens = [];
+    $buffer = '';
+    foreach (Str\chunk($pattern) as $byte) {
+        if (Token::isValidType($byte)) {
+            $tokens[] = new Token(Token::TYPE_STRING, $buffer);
+            $buffer = '';
+            $tokens[] = new Token($byte, $byte);
+        } else {
+            $buffer .= $byte;
+        }
     }
-  }
 
-  if ($buffer !== '') {
-    $tokens[] = new Token(Token::TYPE_STRING, $buffer);
-  }
+    if ($buffer !== '') {
+        $tokens[] = new Token(Token::TYPE_STRING, $buffer);
+    }
 
-  return Vec\filter($tokens, static fn(Token $t): bool => !($t->getType() === Token::TYPE_STRING && $t->getValue() === ''));
+    return Vec\filter($tokens, static fn (Token $t): bool => !($t->getType() === Token::TYPE_STRING && $t->getValue() === ''));
 }
