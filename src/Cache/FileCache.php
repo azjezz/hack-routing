@@ -42,7 +42,7 @@ final class FileCache implements CacheInterface
             $result = require $file;
         } else {
             $result = $factory();
-            Filesystem\write_file($file, '<?php return unserialize("' . serialize($result) . '");');
+            Filesystem\write_file($file, "<?php return unserialize('" . serialize($result) . "');");
         }
 
         return $result;

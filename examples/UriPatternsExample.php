@@ -9,6 +9,7 @@ namespace HackRouting\Examples\UrlPatternsExample;
 require_once(__DIR__ . '/../vendor/autoload.php');
 
 use HackRouting\BaseRouter;
+use HackRouting\Cache\FileCache;
 use HackRouting\HttpMethod;
 use HackRouting\Parameter\RequestParameters;
 use HackRouting\UriPattern\GetFastRoutePatternFromUriPattern;
@@ -120,7 +121,7 @@ function get_example_paths(): iterable
 
 (static function (): void {
     $output = IO\output_handle();
-    $router = new UriPatternsExample();
+    $router = new UriPatternsExample(new FileCache());
     foreach (get_example_paths() as $path) {
         [$controller, $params] = $router->routeMethodAndPath(
             HttpMethod::GET,

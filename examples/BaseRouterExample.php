@@ -8,7 +8,9 @@ namespace HackRouting\Examples\BaseRouterExample;
 
 require_once(__DIR__ . '/../vendor/autoload.php');
 
-use HackRouting\{BaseRouter, HttpMethod};
+use HackRouting\BaseRouter;
+use HackRouting\Cache\MemoryCache;
+use HackRouting\HttpMethod;
 use Psl\IO;
 use Psl\Str;
 
@@ -49,7 +51,7 @@ function get_example_inputs(): iterable
 
 (static function (): void {
     $output = IO\output_handle();
-    $router = new BaseRouterExample();
+    $router = new BaseRouterExample(new MemoryCache());
     foreach (get_example_inputs() as $input) {
         [$method, $path] = $input;
 
