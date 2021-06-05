@@ -148,7 +148,7 @@ final class RouterTest extends TestCase
         [$responder, $_data] = $router->routeMethodAndPath(HttpMethod::HEAD, '/get');
 
         self::assertSame('get', $responder);
-        
+
         // GET -> HEAD
         try {
             $router->routeMethodAndPath(HttpMethod::GET, '/head');
@@ -204,10 +204,10 @@ final class RouterTest extends TestCase
         self::assertSame($expected_responder, $responder);
         self::assertSame($expected_data, $data);
 
-        [$responder, $data] = $resolver->resolve(HttpMethod::GET, $in);
+        // don't compare $_data to $expected_data as it is not url-decoded, that is done by the router.
+        [$responder, $_data] = $resolver->resolve(HttpMethod::GET, $in);
 
         self::assertSame($expected_responder, $responder);
-        self::assertSame($expected_data, $data);
 
         [$responder, $data] = $this->getRouter()->setResolver($resolver)->routeMethodAndPath(HttpMethod::HEAD, $in);
 
@@ -281,7 +281,7 @@ final class RouterTest extends TestCase
 
     /**
      * @param null|array<non-empty-string, array<string, string>> $routes
-     * 
+     *
      * @return TestRouter<string>
      */
     private function getRouter(?array $routes = null): TestRouter
