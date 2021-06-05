@@ -61,7 +61,7 @@ example.
 UriPatterns
 -----------
 
-Generate FastRoute fragments, URIs (for linking), and retrieve URI parameters in a consistent and type-safe way:
+Generate route fragments, URIs (for linking), and retrieve URI parameters in a consistent and type-safe way:
 
 ```php
 <?php

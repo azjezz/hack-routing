@@ -16,7 +16,7 @@ final class UriPatternTest extends TestCase
     {
         $pattern = (new UriPattern())
             ->literal('/foo')
-            ->getFastRouteFragment();
+            ->getRouteFragment();
 
         self::assertSame('/foo', $pattern);
     }
@@ -26,7 +26,7 @@ final class UriPatternTest extends TestCase
         $pattern = (new UriPattern())
             ->literal('/foo')
             ->literal('/bar')
-            ->getFastRouteFragment();
+            ->getRouteFragment();
 
         self::assertSame('/foo/bar', $pattern);
     }
@@ -36,7 +36,7 @@ final class UriPatternTest extends TestCase
         $pattern = (new UriPattern())
             ->literal('/~')
             ->string('username')
-            ->getFastRouteFragment();
+            ->getRouteFragment();
 
         self::assertSame('/~{username}', $pattern);
     }
@@ -46,7 +46,7 @@ final class UriPatternTest extends TestCase
         $pattern = (new UriPattern())
             ->literal('/~')
             ->stringWithSlashes('username')
-            ->getFastRouteFragment();
+            ->getRouteFragment();
 
         self::assertSame('/~{username:.+}', $pattern);
     }
@@ -61,7 +61,7 @@ final class UriPatternTest extends TestCase
         $pattern = (new UriPattern())
             ->literal('/blog/')
             ->int('post_id')
-            ->getFastRouteFragment();
+            ->getRouteFragment();
 
         self::assertSame('/blog/{post_id:\d+}', $pattern);
     }
@@ -85,7 +85,7 @@ final class UriPatternTest extends TestCase
     public function testIntParamAssertThrows(string $input): void
     {
         $this->expectException(CoercionException::class);
-        
+
         (new IntRequestParameter('foo'))->assert($input);
     }
 }

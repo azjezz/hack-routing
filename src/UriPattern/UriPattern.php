@@ -10,7 +10,7 @@ use HackRouting\Parameter\UriParameter;
 use Psl\Str;
 use Psl\Vec;
 
-class UriPattern implements HasFastRouteFragment
+class UriPattern implements HasRouteFragment
 {
     /**
      * @var list<UriPatternPart>
@@ -23,9 +23,9 @@ class UriPattern implements HasFastRouteFragment
         return $this;
     }
 
-    final public function getFastRouteFragment(): string
+    final public function getRouteFragment(): string
     {
-        $fragments = Vec\map($this->parts, fn (UriPatternPart $part): string => $part->getFastRouteFragment());
+        $fragments = Vec\map($this->parts, fn (UriPatternPart $part): string => $part->getRouteFragment());
 
         return Str\join($fragments, '');
     }

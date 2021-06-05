@@ -7,11 +7,11 @@ namespace HackRouting\UriPattern;
 /**
  * @psalm-require-implements HasUriPattern
  */
-trait GetFastRoutePatternFromUriPattern
+trait GetRoutePatternFromUriPattern
 {
-    final public static function getFastRoutePattern(): string
+    final public static function getRoutePattern(): string
     {
-        return static::getUriPattern()->getFastRouteFragment();
+        return static::getUriPattern()->getRouteFragment();
     }
 
     abstract public static function getUriPattern(): UriPattern;

@@ -11,7 +11,7 @@ final class UriPatternLiteral implements UriPatternPart
     {
     }
 
-    public function getFastRouteFragment(): string
+    public function getRouteFragment(): string
     {
         $value = $this->value;
         // No escaping required :)

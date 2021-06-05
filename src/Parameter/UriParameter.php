@@ -10,7 +10,7 @@ abstract class UriParameter extends RequestParameter implements UriPatternPart
 {
     abstract public function getRegExpFragment(): ?string;
 
-    final public function getFastRouteFragment(): string
+    final public function getRouteFragment(): string
     {
         $name = $this->getName();
         $re = $this->getRegExpFragment();

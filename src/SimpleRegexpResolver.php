@@ -35,7 +35,7 @@ final class SimpleRegexpResolver implements IResolver
              */
             static fn (array $routes): array => Dict\map_keys(
                 $routes,
-                static fn (string $route): string => self::fastRouteToRegexp($route),
+                static fn (string $route): string => self::routeToRegexp($route),
             ),
         );
     }
@@ -68,7 +68,7 @@ final class SimpleRegexpResolver implements IResolver
         throw new NotFoundException();
     }
 
-    private static function fastRouteToRegexp(string|int $route): string
+    private static function routeToRegexp(string|int $route): string
     {
         $pattern = PatternParser\Parser::parse((string) $route);
 

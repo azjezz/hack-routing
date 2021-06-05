@@ -12,7 +12,7 @@ use HackRouting\BaseRouter;
 use HackRouting\Cache\FileCache;
 use HackRouting\HttpMethod;
 use HackRouting\Parameter\RequestParameters;
-use HackRouting\UriPattern\GetFastRoutePatternFromUriPattern;
+use HackRouting\UriPattern\GetRoutePatternFromUriPattern;
 use HackRouting\UriPattern\GetUriBuilderFromUriPattern;
 use HackRouting\UriPattern\HasUriPattern;
 use HackRouting\UriPattern\UriPattern;
@@ -24,7 +24,7 @@ use Psl\Str;
  */
 abstract class WebController implements HasUriPattern
 {
-    use GetFastRoutePatternFromUriPattern;
+    use GetRoutePatternFromUriPattern;
     use GetUriBuilderFromUriPattern;
 
     abstract public function getResponse(): string;
@@ -99,8 +99,9 @@ final class UriPatternsExample extends BaseRouter
     public function getRoutes(): array
     {
         $urls_to_controllers = [];
+        /** @var \HackRouting\Examples\UrlPatternsExample\WebController $controller */
         foreach (self::getControllers() as $controller) {
-            $pattern = $controller::getFastRoutePattern();
+            $pattern = $controller::getRoutePattern();
             $urls_to_controllers[$pattern] = $controller;
         }
 
