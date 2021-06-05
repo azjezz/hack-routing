@@ -8,7 +8,7 @@ namespace HackRouting\Examples\UrlPatternsExample;
 
 require_once(__DIR__ . '/../vendor/autoload.php');
 
-use HackRouting\BaseRouter;
+use HackRouting\AbstractMatcher;
 use HackRouting\Cache\FileCache;
 use HackRouting\HttpMethod;
 use HackRouting\Parameter\RequestParameters;
@@ -80,7 +80,7 @@ final class UserPageController extends WebController
 /**
  * @extends BaseRouter<class-string<WebController>>
  */
-final class UriPatternsExample extends BaseRouter
+final class UriPatternsExample extends AbstractMatcher
 {
     /**
      * @return list<class-string<WebController>>
@@ -124,7 +124,7 @@ function get_example_paths(): iterable
     $output = IO\output_handle();
     $router = new UriPatternsExample(new FileCache());
     foreach (get_example_paths() as $path) {
-        [$controller, $params] = $router->routeMethodAndPath(
+        [$controller, $params] = $router->match(
             HttpMethod::GET,
             $path,
         );

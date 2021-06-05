@@ -8,7 +8,7 @@ namespace HackRouting\Examples\BaseRouterExample;
 
 require_once(__DIR__ . '/../vendor/autoload.php');
 
-use HackRouting\BaseRouter;
+use HackRouting\AbstractMatcher;
 use HackRouting\Cache\MemoryCache;
 use HackRouting\HttpMethod;
 use Psl\IO;
@@ -17,7 +17,7 @@ use Psl\Str;
 /**
  * @extends BaseRouter<(function(array<string, string>):string)>
  */
-final class BaseRouterExample extends BaseRouter
+final class MatcherExample extends AbstractMatcher
 {
     /**
      * @return array<non-empty-string, array<string, (function(array<string, string>):string)>>
@@ -51,15 +51,14 @@ function get_example_inputs(): iterable
 
 (static function (): void {
     $output = IO\output_handle();
-    $router = new BaseRouterExample(new MemoryCache());
+    $router = new MatcherExample(new MemoryCache());
     foreach (get_example_inputs() as $input) {
         [$method, $path] = $input;
 
-        [$responder, $params] = $router->routeMethodAndPath($method, $path);
+        [$responder, $params] = $router->match($method, $path);
 
         $method = Str\pad_right(Str\format('[%s]', $method), 8);
         $request = Str\pad_right(Str\format('%s %s', $method, $path), 25);
         $output->write(Str\format("%s -> %s\n", $request, $responder($params)));
-
     }
 })();

@@ -21,8 +21,8 @@ HTTP Exceptions
 
 Exception classes representing common situations in HTTP applications:
 
-- `HackRouting\HttpException\InternalServerError`
-- `HackRouting\HttpException\MethodNotAllowed`
+- `HackRouting\HttpException\InternalServerErrorException`
+- `HackRouting\HttpException\MethodNotAllowedException`
 - `HackRouting\HttpException\NotFoundException`
 
 BaseRouter
@@ -34,36 +34,32 @@ A simple typed request router. Example:
 <?php
 
 use Psl\Str;
-use HackRouting\BaseRouter;
+use HackRouting\AbstractMatcher;
 use HackRouting\HttpMethod;
 
 /**
- * TResponder can be whatever you want; in this case, it's a
- * callable, but classname<MyWebControllerBase> is also a
- * common choice.
- *
- * @extends BaseRouter<(function(ImmMap<string, string>):string)>
+ * @extends BaseRouter<(function(array<string, string>):string)>
  */
-final class BaseRouterExample extends BaseRouter {
+final class Matcher extends AbstractMatcher {
   /**
-   * @return array<non-empty-string, array<string, (function(ImmMap<string, string>):string)>>
+   * @return array<non-empty-string, array<string, (function(array<string, string>):string)>>
    */
   protected function getRoutes(): array {
     return [
       HttpMethod::GET => [
-        '/' => static fn($parameters): string => 'Hello, World!',
-        '/user/{username}/' => static fn($parameters): string => Str\format('Hello, %s!', $parameters['username']),
+        '/' => static fn(array $parameters): string => 'Hello, World!',
+        '/user/{username}/' => static fn(array $parameters): string => Str\format('Hello, %s!', $parameters['username']),
       ],
 
       HttpMethod::POST => [
-        '/' => static fn($parameters): string => 'Hello, POST world',
+        '/' => static fn(arrray $parameters): string => 'Hello, POST world',
       ],
     ];
   }
 }
 ```
 
-Simplified for conciseness - see [`examples/BaseRouterExample.php`](examples/BaseRouterExample.php) for full executable
+Simplified for conciseness - see [`examples/MatcherExample.php`](examples/MatcherExample.php) for full executable
 example.
 
 UriPatterns

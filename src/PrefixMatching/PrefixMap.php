@@ -202,8 +202,6 @@ final class PrefixMap
             );
         }
 
-        // optimize prefixes[/foo] -> regexps[
-
         return new self($literals, $prefixes, $regexps);
     }
 

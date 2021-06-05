@@ -4,16 +4,16 @@ declare(strict_types=1);
 
 namespace HackRouting\Tests\Fixture;
 
-use HackRouting\BaseRouter;
+use HackRouting\AbstractMatcher;
 use HackRouting\Cache\CacheInterface;
 use HackRouting\IResolver;
 
 /**
- * @template TResponder
+ * @template-covariant TResponder
  *
  * @extends BaseRouter<TResponder>
  */
-final class TestRouter extends BaseRouter
+final class TestMatcher extends AbstractMatcher
 {
     /**
      * @param array<non-empty-string, array<string, TResponder>> $routes
@@ -38,7 +38,7 @@ final class TestRouter extends BaseRouter
     /**
      * @param IResolver<TResponder>
      */
-    public function setResolver(IResolver $resolver): TestRouter
+    public function setResolver(IResolver $resolver): TestMatcher
     {
         $this->resolver = $resolver;
         return $this;

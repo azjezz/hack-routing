@@ -4,6 +4,6 @@ declare(strict_types=1);
 
 namespace HackRouting\HttpException;
 
-class InternalServerErrorException extends HttpException
+final class InternalServerErrorException extends HttpException
 {
 }

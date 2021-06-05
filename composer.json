@@ -1,47 +1,47 @@
 {
-  "name": "azjezz/hack-routing",
-  "description": "Fast, type-safe request routing, parameter retrieval, and link generation.",
-  "keywords": [
-    "hack",
-    "router",
-    "routing",
-    "http"
-  ],
-  "homepage": "https://github.com/azjezz/hack-routing",
-  "license": "MIT",
-  "authors": [
-    {
-      "name": "Fred Emmott",
-      "homepage": "https://github.com/fredemmott"
+    "name": "azjezz/hack-routing",
+    "description": "Fast, type-safe request routing, parameter retrieval, and link generation.",
+    "keywords": [
+        "hack",
+        "router",
+        "routing",
+        "http"
+    ],
+    "homepage": "https://github.com/azjezz/hack-routing",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Fred Emmott",
+            "homepage": "https://github.com/fredemmott"
+        },
+        {
+            "name": "Saif Eddin Gmati",
+            "homepage": "https://github.com/azjezz"
+        }
+    ],
+    "require": {
+        "php": "^8.0",
+        "azjezz/psl": "^1.7.2"
     },
-    {
-      "name": "Saif Eddin Gmati",
-      "homepage": "https://github.com/azjezz"
-    }
-  ],
-  "require": {
-    "php": "^8.0",
-    "azjezz/psl": "^1.7.2"
-  },
-  "require-dev": {
-    "ext-apcu": "*",
-    "php-standard-library/psalm-plugin": "^1.1.1",
-    "phpunit/phpunit": "^9.5.4",
-    "roave/security-advisories": "dev-latest",
-    "squizlabs/php_codesniffer": "^3.6",
-    "vimeo/psalm": "^4.7.3"
-  },
-  "autoload": {
-    "psr-4": {
-      "HackRouting\\": "src/"
+    "require-dev": {
+        "ext-apcu": "*",
+        "php-standard-library/psalm-plugin": "^1.1.1",
+        "phpunit/phpunit": "^9.5.5",
+        "roave/security-advisories": "dev-latest",
+        "squizlabs/php_codesniffer": "^3.6.0",
+        "vimeo/psalm": "^4.7.3"
     },
-    "files": [
-      "src/PatternParser/tokenize.php"
-    ]
-  },
-  "autoload-dev": {
-    "psr-4": {
-      "HackRouting\\Tests\\": "tests/"
+    "autoload": {
+        "psr-4": {
+            "HackRouting\\": "src/"
+        },
+        "files": [
+            "src/PatternParser/tokenize.php"
+        ]
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "HackRouting\\Tests\\": "tests/"
+        }
     }
-  }
 }

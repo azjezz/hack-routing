@@ -6,7 +6,13 @@ namespace HackRouting;
 
 require_once(__DIR__ . '/../vendor/autoload.php');
 
-use Psl\{Dict, Math, PseudoRandom, Str, Vec, Json, IO};
+use Psl\Dict;
+use Psl\Math;
+use Psl\PseudoRandom;
+use Psl\Str;
+use Psl\Vec;
+use Psl\Json;
+use Psl\IO;
 
 // Dump out a massive URI map for testing/benchmarking
 final class RandomUriMapGenerator

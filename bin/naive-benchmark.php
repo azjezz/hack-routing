@@ -10,7 +10,16 @@ use HackRouting\Cache\ApcuCache;
 use HackRouting\Cache\FileCache;
 use HackRouting\Cache\MemoryCache;
 use HackRouting\HttpException\NotFoundException;
-use Psl\{Dict, Env, Filesystem, IO, Iter, Json, Math, Str, Type, Vec};
+use Psl\Dict;
+use Psl\Env;
+use Psl\Filesystem;
+use Psl\IO;
+use Psl\Iter;
+use Psl\Json;
+use Psl\Math;
+use Psl\Str;
+use Psl\Type;
+use Psl\Vec;
 use Psl;
 use function microtime;
 
@@ -175,21 +184,21 @@ final class NaiveBenchmark
             'simple-regexp' => static fn () => new SimpleRegexpResolver($map),
             'prefix-match' => static fn () => PrefixMatchingResolver::fromFlatMap($map),
             'prefix-match(file)' => static function () use ($map, $file_cache) {
-                $prefix_map = $file_cache->fetch(__FUNCTION__ . __DIR__, function() use($map) {
+                $prefix_map = $file_cache->fetch(__FUNCTION__ . __DIR__, function () use ($map) {
                     return Dict\map($map, fn ($v) => PrefixMatching\PrefixMap::fromFlatMap($v));
                 });
 
                 return new PrefixMatchingResolver($prefix_map);
             },
             'prefix-match(apcu)' => static function () use ($map, $apcu_cache) {
-                $prefix_map = $apcu_cache->fetch(__FUNCTION__ . __DIR__, function() use($map) {
+                $prefix_map = $apcu_cache->fetch(__FUNCTION__ . __DIR__, function () use ($map) {
                     return Dict\map($map, fn ($v) => PrefixMatching\PrefixMap::fromFlatMap($v));
                 });
 
                 return new PrefixMatchingResolver($prefix_map);
             },
             'prefix-match(memory)' => static function () use ($map, $memory_cache) {
-                $prefix_map = $memory_cache->fetch(__FUNCTION__ . __DIR__, function() use($map) {
+                $prefix_map = $memory_cache->fetch(__FUNCTION__ . __DIR__, function () use ($map) {
                     return Dict\map($map, fn ($v) => PrefixMatching\PrefixMap::fromFlatMap($v));
                 });
 

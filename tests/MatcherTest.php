@@ -4,18 +4,18 @@ declare(strict_types=1);
 
 namespace HackRouting\Tests;
 
-use HackRouting\BaseRouter;
+use HackRouting\AbstractMatcher;
 use HackRouting\HttpException\MethodNotAllowedException;
 use HackRouting\HttpException\NotFoundException;
 use HackRouting\HttpMethod;
 use HackRouting\IResolver;
 use HackRouting\PrefixMatchingResolver;
 use HackRouting\SimpleRegexpResolver;
-use HackRouting\Tests\Fixture\TestRouter;
+use HackRouting\Tests\Fixture\TestMatcher;
 use PHPUnit\Framework\TestCase;
 use Psl\Dict;
 
-final class RouterTest extends TestCase
+final class MatcherTest extends TestCase
 {
     /**
      * @var list<non-empty-string>
@@ -97,7 +97,7 @@ final class RouterTest extends TestCase
     }
 
     /**
-     * @return list<array{string, function(array<non-empty-string, array<string, string>>): IResolver<string>}>
+     * @return list<array{string, (function(array<non-empty-string, array<string, string>>): IResolver<string>)}>
      */
     public function getAllResolvers(): array
     {
@@ -145,13 +145,13 @@ final class RouterTest extends TestCase
         $router = $this->getRouter($map)->setResolver($factory($map));
 
         // HEAD -> GET ( re-routing )
-        [$responder, $_data] = $router->routeMethodAndPath(HttpMethod::HEAD, '/get');
+        [$responder, $_data] = $router->match(HttpMethod::HEAD, '/get');
 
         self::assertSame('get', $responder);
 
         // GET -> HEAD
         try {
-            $router->routeMethodAndPath(HttpMethod::GET, '/head');
+            $router->match(HttpMethod::GET, '/head');
             self::fail('GET -> HEAD');
         } catch (MethodNotAllowedException $e) {
             self::assertSame([HttpMethod::HEAD], $e->getAllowedMethods());
@@ -159,7 +159,7 @@ final class RouterTest extends TestCase
 
         // HEAD -> POST
         try {
-            $router->routeMethodAndPath(HttpMethod::HEAD, '/post');
+            $router->match(HttpMethod::HEAD, '/post');
             self::fail('HEAD -> POST');
         } catch (MethodNotAllowedException $e) {
             self::assertSame([HttpMethod::POST], $e->getAllowedMethods());
@@ -167,7 +167,7 @@ final class RouterTest extends TestCase
 
         // GET -> POST
         try {
-            $router->routeMethodAndPath(HttpMethod::GET, '/post');
+            $router->match(HttpMethod::GET, '/post');
             self::fail('GET -> POST');
         } catch (MethodNotAllowedException $e) {
             self::assertSame([HttpMethod::POST], $e->getAllowedMethods());
@@ -182,7 +182,7 @@ final class RouterTest extends TestCase
      */
     public function testMatchesPattern(string $in, string $expected_responder, array $expected_data): void
     {
-        [$actual_responder, $actual_data] = $this->getRouter()->routeMethodAndPath(HttpMethod::GET, $in);
+        [$actual_responder, $actual_data] = $this->getRouter()->match(HttpMethod::GET, $in);
 
         self::assertSame($expected_data, $actual_data);
         self::assertSame($expected_responder, $actual_responder);
@@ -201,7 +201,7 @@ final class RouterTest extends TestCase
         string $expected_responder,
         array $expected_data
     ): void {
-        [$responder, $data] = $this->getRouter()->setResolver($resolver)->routeMethodAndPath(HttpMethod::GET, $in);
+        [$responder, $data] = $this->getRouter()->setResolver($resolver)->match(HttpMethod::GET, $in);
 
         self::assertSame($expected_responder, $responder);
         self::assertSame($expected_data, $data);
@@ -211,7 +211,7 @@ final class RouterTest extends TestCase
 
         self::assertSame($expected_responder, $responder);
 
-        [$responder, $data] = $this->getRouter()->setResolver($resolver)->routeMethodAndPath(HttpMethod::HEAD, $in);
+        [$responder, $data] = $this->getRouter()->setResolver($resolver)->match(HttpMethod::HEAD, $in);
 
         self::assertSame($expected_responder, $responder);
         self::assertSame($expected_data, $data);
@@ -220,7 +220,7 @@ final class RouterTest extends TestCase
     /**
      * @dataProvider expectedMatches
      *
-     * @param array<string, string> $_expected_data
+     * @param array<string, string> $expected_data
      */
     public function testSimpleRouting(
         string $path,
@@ -229,7 +229,7 @@ final class RouterTest extends TestCase
     ): void {
         $router = $this->getRouter();
 
-        [$direct_responder, $direct_data] = $router->routeMethodAndPath(HttpMethod::GET, $path);
+        [$direct_responder, $direct_data] = $router->match(HttpMethod::GET, $path);
 
         self::assertSame($expected_data, $direct_data);
         self::assertSame($expected_responder, $direct_responder);
@@ -246,7 +246,7 @@ final class RouterTest extends TestCase
 
         $this->expectException(NotFoundException::class);
 
-        $router->routeMethodAndPath(HttpMethod::GET, '/__404');
+        $router->match(HttpMethod::GET, '/__404');
     }
 
     /**
@@ -261,14 +261,14 @@ final class RouterTest extends TestCase
 
         $this->expectException(NotFoundException::class);
 
-        $router->routeMethodAndPath(HttpMethod::GET, '/__404');
+        $router->match(HttpMethod::GET, '/__404');
     }
 
     public function testMethodNotAllowed(): void
     {
         $this->expectException(MethodNotAllowedException::class);
 
-        $this->getRouter()->routeMethodAndPath(HttpMethod::POST, '/foo');
+        $this->getRouter()->match(HttpMethod::POST, '/foo');
     }
 
     public function testCovariantTResponder(): void
@@ -278,10 +278,10 @@ final class RouterTest extends TestCase
     }
 
     /**
-     * @param BaseRouter<array-key> $_1
-     * @param BaseRouter<string> $_2
+     * @param AbstractMatcher<array-key> $_1
+     * @param AbstractMatcher<string> $_2
      */
-    private function typeCheckCovariantTResponder(BaseRouter $_1, BaseRouter $_2): void
+    private function typeCheckCovariantTResponder(AbstractMatcher $_1, AbstractMatcher $_2): void
     {
         $this->addToAssertionCount(1);
     }
@@ -289,9 +289,9 @@ final class RouterTest extends TestCase
     /**
      * @param null|array<non-empty-string, array<string, string>> $routes
      *
-     * @return TestRouter<string>
+     * @return TestMatcher<string>
      */
-    private function getRouter(?array $routes = null): TestRouter
+    private function getRouter(?array $routes = null): TestMatcher
     {
         if (null === $routes) {
             $routes = [
@@ -299,6 +299,6 @@ final class RouterTest extends TestCase
             ];
         }
 
-        return new TestRouter($routes);
+        return new TestMatcher($routes);
     }
 }
