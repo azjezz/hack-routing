@@ -26,11 +26,17 @@ final class PatternNode implements Node
 
     public function toStringForDebug(): string
     {
-        return '[' . Str\join(Vec\map($this->children, static fn (Node $child): string => $child->toStringForDebug()), ', ') . ']';
+        return '[' . Str\join(Vec\map(
+            $this->children,
+            static fn (Node $child): string => $child->toStringForDebug()
+        ), ', ') . ']';
     }
 
     public function asRegexp(string $delimiter): string
     {
-        return Str\join(Vec\map($this->children, static fn (Node $child): string => $child->asRegexp($delimiter)), '');
+        return Str\join(Vec\map(
+            $this->children,
+            static fn (Node $child): string => $child->asRegexp($delimiter)
+        ), '');
     }
 }

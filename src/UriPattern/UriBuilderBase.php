@@ -56,7 +56,11 @@ abstract class UriBuilderBase
                 continue;
             }
 
-            Psl\invariant($part instanceof RequestParameter, 'expecting all UriPatternParts to be literals or parameters, got %s', $part::class);
+            Psl\invariant(
+                $part instanceof RequestParameter,
+                'Expecting all UriPatternParts to be literals or parameters, got "%s".',
+                $part::class
+            );
 
             if ($uri === '') {
                 $uri = '/';

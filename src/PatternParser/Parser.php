@@ -104,7 +104,12 @@ final class Parser
          * @var Token $token
          */
         $token = Iter\first($tokens);
-        Psl\invariant($token->getType() === Token::TYPE_STRING, 'Expected parameter to start with a name, got %s', $token->toString());
+        Psl\invariant(
+            $token->getType() === Token::TYPE_STRING,
+            'Expected parameter to start with a name, got %s',
+            $token->toString()
+        );
+
         $name = $token->getValue();
         $tokens = Vec\values(Dict\drop($tokens, 1));
 
@@ -145,7 +150,12 @@ final class Parser
             $regexp .= $token->getValue();
         }
 
-        Psl\invariant($depth === 0, '%s without matching %s in regexp', Token::TYPE_OPEN_BRACE, Token::TYPE_CLOSE_BRACE);
+        Psl\invariant(
+            $depth === 0,
+            '%s without matching %s in regexp',
+            Token::TYPE_OPEN_BRACE,
+            Token::TYPE_CLOSE_BRACE
+        );
 
         return [new ParameterNode($name, $regexp), $tokens];
     }

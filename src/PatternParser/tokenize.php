@@ -28,5 +28,8 @@ function tokenize(string $pattern): array
         $tokens[] = new Token(Token::TYPE_STRING, $buffer);
     }
 
-    return Vec\filter($tokens, static fn (Token $t): bool => !($t->getType() === Token::TYPE_STRING && $t->getValue() === ''));
+    return Vec\filter(
+        $tokens,
+        static fn (Token $t): bool => !($t->getType() === Token::TYPE_STRING && $t->getValue() === '')
+    );
 }

@@ -153,7 +153,6 @@ final class RouterTest extends TestCase
         try {
             $router->routeMethodAndPath(HttpMethod::GET, '/head');
             self::fail('GET -> HEAD');
-
         } catch (MethodNotAllowedException $e) {
             self::assertSame([HttpMethod::HEAD], $e->getAllowedMethods());
         }
@@ -162,7 +161,6 @@ final class RouterTest extends TestCase
         try {
             $router->routeMethodAndPath(HttpMethod::HEAD, '/post');
             self::fail('HEAD -> POST');
-
         } catch (MethodNotAllowedException $e) {
             self::assertSame([HttpMethod::POST], $e->getAllowedMethods());
         }
@@ -171,7 +169,6 @@ final class RouterTest extends TestCase
         try {
             $router->routeMethodAndPath(HttpMethod::GET, '/post');
             self::fail('GET -> POST');
-
         } catch (MethodNotAllowedException $e) {
             self::assertSame([HttpMethod::POST], $e->getAllowedMethods());
         }
@@ -197,8 +194,13 @@ final class RouterTest extends TestCase
      * @param IResolver<string> $resolver
      * @param array<string, string> $expected_data
      */
-    public function testAllResolvers(string $_resolver_name, IResolver $resolver, string $in, string $expected_responder, array $expected_data): void
-    {
+    public function testAllResolvers(
+        string $_resolver_name,
+        IResolver $resolver,
+        string $in,
+        string $expected_responder,
+        array $expected_data
+    ): void {
         [$responder, $data] = $this->getRouter()->setResolver($resolver)->routeMethodAndPath(HttpMethod::GET, $in);
 
         self::assertSame($expected_responder, $responder);
@@ -220,12 +222,17 @@ final class RouterTest extends TestCase
      *
      * @param array<string, string> $_expected_data
      */
-    public function testRequestResponseInterfacesSupport(string $path, string $_expected_responder, array $_expected_data): void
-    {
+    public function testSimpleRouting(
+        string $path,
+        string $expected_responder,
+        array $expected_data
+    ): void {
         $router = $this->getRouter();
+
         [$direct_responder, $direct_data] = $router->routeMethodAndPath(HttpMethod::GET, $path);
 
-        self::assertSame('/', $path[0]);
+        self::assertSame($expected_data, $direct_data);
+        self::assertSame($expected_responder, $direct_responder);
     }
 
     /**

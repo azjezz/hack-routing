@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace HackRouting\Tests\Fixture;
 
-use HackRouting\{BaseRouter, Cache\CacheInterface, HttpMethod, IResolver};
+use HackRouting\BaseRouter;
+use HackRouting\Cache\CacheInterface;
+use HackRouting\IResolver;
 
 /**
  * @template TResponder

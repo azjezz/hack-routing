@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace HackRouting\PatternParser;
 
-use Psl\Str;
 use Psl\Iter;
+use Psl\Str;
 
 final class Token
 {
@@ -16,7 +16,14 @@ final class Token
     public const TYPE_OPEN_BRACKET = '[';
     public const TYPE_CLOSE_BRACKET = ']';
 
-    private const TYPES = [self::TYPE_STRING, self::TYPE_COLON, self::TYPE_OPEN_BRACE, self::TYPE_CLOSE_BRACE, self::TYPE_OPEN_BRACKET, self::TYPE_CLOSE_BRACKET];
+    private const TYPES = [
+        self::TYPE_STRING,
+        self::TYPE_COLON,
+        self::TYPE_OPEN_BRACE,
+        self::TYPE_CLOSE_BRACE,
+        self::TYPE_OPEN_BRACKET,
+        self::TYPE_CLOSE_BRACKET
+    ];
 
     /**
      * @param Token::TYPE_* $type
