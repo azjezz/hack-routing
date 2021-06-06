@@ -93,7 +93,7 @@ final class NaiveBenchmark
         $map = self::getMap();
         $resolve_time = 0.0;
         $lookups = 0;
-        for ($i=0; $i < 10; $i++) { 
+        for ($i=0; $i < 10; $i++) {
             foreach ($map as $row) {
                 [$expected_responder, $examples] = $row;
                 foreach ($examples as $uri => $expected_data) {
@@ -108,11 +108,11 @@ final class NaiveBenchmark
                             $uri,
                             $expected_responder,
                         );
-                    
+
                         throw $e;
                     }
                     $resolve_time += microtime(true) - $resolve_start;
-                
+
                     Psl\invariant(
                         $responder === $expected_responder,
                         "For resolver %s:\nFor path %s:\n  Expected: %s\n  Actual: %s\n",
@@ -126,7 +126,7 @@ final class NaiveBenchmark
                          * @param array<string, string> $dict
                          */
                         static fn (array $dict): string => Str\join(Vec\map(Str\split(\var_export($dict, true), "\n"), fn (string $line): string => '    ' . $line), "\n");
-                
+
                     Psl\invariant(
                         $data === $expected_data,
                         "For resolver: %s\nFor path %s:\n  Expected data:\n%s\n  Actual data:\n%s\n",

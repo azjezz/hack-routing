@@ -6,8 +6,6 @@ namespace HackRouting\Resolver;
 
 use HackRouting\HttpException\NotFoundException;
 use HackRouting\PrefixMatching\PrefixMap;
-use Psl\Dict;
-use Psl\Str\Byte;
 
 use function array_filter;
 use function array_merge;
@@ -48,12 +46,12 @@ final class PrefixMatchingResolver implements ResolverInterface
      */
     public static function fromFlatMap(array $map): PrefixMatchingResolver
     {
-        return new self(Dict\map(
-            $map,
+        return new self(array_map(
             /**
              * @param array<string, Tr> $flat_map
              */
-            static fn (array $flat_map): PrefixMap => PrefixMap::fromFlatMap($flat_map)
+            static fn (array $flat_map): PrefixMap => PrefixMap::fromFlatMap($flat_map),
+            $map,
         ));
     }
 
@@ -90,7 +88,7 @@ final class PrefixMatchingResolver implements ResolverInterface
 
         $prefixes = $map->getPrefixes();
         if ($prefixes) {
-            $prefix = Byte\slice($path, 0, $map->getPrefixLength());
+            $prefix = substr($path, 0, $map->getPrefixLength());
             if (isset($prefixes[$prefix])) {
                 return $this->resolveWithMap(
                     substr($path, strlen($prefix)),
