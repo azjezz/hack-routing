@@ -71,7 +71,7 @@ final class PrefixMap
              *
              * @return array{0: list<Node>, 1: Ts}
              */
-            static fn(string $pattern, mixed $responder): array => [
+            static fn (string $pattern, mixed $responder): array => [
                 Parser::parse($pattern)->getChildren(),
                 $responder
             ],
@@ -123,7 +123,7 @@ final class PrefixMap
             $regexps[] = [
                 Str\join(Vec\map(
                     Vec\concat([$node], $nodes),
-                    static fn(Node $n): string => $n->asRegexp('#')
+                    static fn (Node $n): string => $n->asRegexp('#')
                 ), ''),
                 [],
                 $responder,
@@ -136,7 +136,7 @@ final class PrefixMap
             /**
              * @param array{0: string, 1: list<Node>, 2: Ts} $entry
              */
-            static fn(array $entry): string => $entry[0]
+            static fn (array $entry): string => $entry[0]
         );
 
         $grouped = self::groupByCommonPrefix(Vec\keys($by_first));
@@ -145,31 +145,34 @@ final class PrefixMap
             /**
              * @param list<string> $keys
              */
-            static fn(string $prefix, array $keys) => self::fromFlatMapImpl(Vec\concat(...Vec\map(
-                $keys,
-                /**
-                 * @return list<array{0: list<Node>, 1: Ts}>
-                 */
-                static fn(string $key) => Vec\map(
-                    $by_first[$key],
+            static function (string|int $prefix, array $keys) use ($by_first): PrefixMap {
+                $prefix = (string) $prefix;
+                return self::fromFlatMapImpl(Vec\concat(...Vec\map(
+                    $keys,
                     /**
-                     * @param array{0: string, 1: list<Node>, 2: Ts} $row
-                     *
-                     * @return array{0: list<Node>, 1: Ts}
+                     * @return list<array{0: list<Node>, 1: Ts}>
                      */
-                    static function (array $row) use ($prefix): array {
-                        if ($row[0] === $prefix) {
-                            return [$row[1], $row[2]];
-                        }
+                    static fn (string $key) => Vec\map(
+                        $by_first[$key],
+                        /**
+                         * @param array{0: string, 1: list<Node>, 2: Ts} $row
+                         *
+                         * @return array{0: list<Node>, 1: Ts}
+                         */
+                        static function (array $row) use ($prefix): array {
+                            if ($row[0] === $prefix) {
+                                return [$row[1], $row[2]];
+                            }
 
-                        $suffix = Byte\strip_prefix($row[0], $prefix);
-                        return [
-                            Vec\concat([new LiteralNode($suffix)], $row[1]),
-                            $row[2],
-                        ];
-                    },
-                ),
-            ))),
+                            $suffix = Byte\strip_prefix($row[0], $prefix);
+                            return [
+                                Vec\concat([new LiteralNode($suffix)], $row[1]),
+                                $row[2],
+                            ];
+                        },
+                    ),
+                )));
+            },
         );
 
         $by_first = Dict\group_by(
@@ -177,13 +180,13 @@ final class PrefixMap
             /**
              * @param array{0: string, 1: list<Node>, 2: Ts} $entry
              */
-            static fn(array $entry): string => $entry[0]
+            static fn (array $entry): string => $entry[0]
         );
         $regexps = [];
         foreach ($by_first as $first => $group_entries) {
             if (Iter\count($group_entries) === 1) {
                 [, $nodes, $responder] = $group_entries[0];
-                $rest = Str\join(Vec\map($nodes, static fn(Node $n): string => $n->asRegexp('#')), '');
+                $rest = Str\join(Vec\map($nodes, static fn (Node $n): string => $n->asRegexp('#')), '');
                 $regexps[$first . $rest] = new PrefixMapOrResponder(null, $responder);
                 continue;
             }
@@ -196,7 +199,7 @@ final class PrefixMap
                      *
                      * @return array{0: list<Node>, 1: Ts}
                      */
-                    static fn(array $e): array => [$e[1], $e[2]]
+                    static fn (array $e): array => [$e[1], $e[2]]
                 )),
                 null,
             );
@@ -212,14 +215,19 @@ final class PrefixMap
      */
     private static function groupByCommonPrefix(array $keys): array
     {
-        if (Iter\is_empty($keys)) {
+        if (!$keys) {
             return [];
         }
-        $lens = Vec\map($keys, static fn(string $key): int => Byte\length($key));
+
+        $lens = Vec\map($keys, static fn (string $key): int => Byte\length($key));
         $min = Math\min($lens);
         Psl\invariant($min !== 0, "Shouldn't have 0-length prefixes");
 
-        return Dict\group_by($keys, static fn(string $key): string => Byte\slice($key, 0, $min));
+        return Dict\group_by($keys, function (string $key) use ($min): string {
+            $var = Byte\slice($key, 0, $min);
+
+            return $var;
+        });
     }
 
     /**

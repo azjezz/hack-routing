@@ -6,23 +6,29 @@ namespace HackRouting\Cache;
 
 use HackRouting\PrefixMatching\PrefixMap;
 
+/**
+ * @template TResponder
+ *
+ * @implements CacheInterface<TResponder>
+ */
 final class MemoryCache implements CacheInterface
 {
     /**
-     * @var array<string, array<non-empty-string, PrefixMap>>
+     * @var array<non-empty-string, PrefixMap<TResponder>>
      */
-    private array $cache = [];
+    private ?array $parse_cache = null;
 
     /**
-     * @template T
+     * @param (callable(): array<non-empty-string, PrefixMap<TResponder>>) $parser
      *
-     * @param (callable(): array<non-empty-string, PrefixMap<T>>) $factory
-     *
-     * @return array<non-empty-string, PrefixMap<T>>
+     * @return array<non-empty-string, PrefixMap<TResponder>>
      */
-    public function fetch(string $item, callable $factory): array
+    public function parsing(callable $parser): array
     {
-        /** @var array<non-empty-string, PrefixMap<T>> */
-        return $this->cache[$item] ?? ($this->cache[$item] = $factory());
+        if (null === $this->parse_cache) {
+            $this->parse_cache = $parser();
+        }
+
+        return $this->parse_cache;
     }
 }

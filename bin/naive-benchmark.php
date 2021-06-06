@@ -6,9 +6,6 @@ namespace HackRouting;
 
 require_once(__DIR__ . '/../vendor/autoload.php');
 
-use HackRouting\Cache\ApcuCache;
-use HackRouting\Cache\FileCache;
-use HackRouting\Cache\MemoryCache;
 use HackRouting\HttpException\NotFoundException;
 use Psl\Dict;
 use Psl\Env;
@@ -96,47 +93,49 @@ final class NaiveBenchmark
         $map = self::getMap();
         $resolve_time = 0.0;
         $lookups = 0;
-        foreach ($map as $row) {
-            [$expected_responder, $examples] = $row;
-            foreach ($examples as $uri => $expected_data) {
-                ++$lookups;
-                $resolve_start = microtime(true);
-                try {
-                    [$responder, $data] = $impl->resolve(HttpMethod::GET, $uri);
-                } catch (NotFoundException $e) {
-                    write(
-                        "!!! %s failed to resolve %s - expected %s !!!\n",
+        for ($i=0; $i < 10; $i++) { 
+            foreach ($map as $row) {
+                [$expected_responder, $examples] = $row;
+                foreach ($examples as $uri => $expected_data) {
+                    ++$lookups;
+                    $resolve_start = microtime(true);
+                    try {
+                        [$responder, $data] = $impl->resolve(HttpMethod::GET, $uri);
+                    } catch (NotFoundException $e) {
+                        write(
+                            "!!! %s failed to resolve %s - expected %s !!!\n",
+                            $name,
+                            $uri,
+                            $expected_responder,
+                        );
+                    
+                        throw $e;
+                    }
+                    $resolve_time += microtime(true) - $resolve_start;
+                
+                    Psl\invariant(
+                        $responder === $expected_responder,
+                        "For resolver %s:\nFor path %s:\n  Expected: %s\n  Actual: %s\n",
                         $name,
                         $uri,
                         $expected_responder,
+                        $responder,
                     );
-
-                    throw $e;
+                    $pretty_data =
+                        /**
+                         * @param array<string, string> $dict
+                         */
+                        static fn (array $dict): string => Str\join(Vec\map(Str\split(\var_export($dict, true), "\n"), fn (string $line): string => '    ' . $line), "\n");
+                
+                    Psl\invariant(
+                        $data === $expected_data,
+                        "For resolver: %s\nFor path %s:\n  Expected data:\n%s\n  Actual data:\n%s\n",
+                        $name,
+                        $uri,
+                        $pretty_data($expected_data),
+                        $pretty_data($data),
+                    );
                 }
-                $resolve_time += microtime(true) - $resolve_start;
-
-                Psl\invariant(
-                    $responder === $expected_responder,
-                    "For resolver %s:\nFor path %s:\n  Expected: %s\n  Actual: %s\n",
-                    $name,
-                    $uri,
-                    $expected_responder,
-                    $responder,
-                );
-                $pretty_data =
-                    /**
-                     * @param array<string, string> $dict
-                     */
-                    static fn (array $dict): string => Str\join(Vec\map(Str\split(\var_export($dict, true), "\n"), fn (string $line): string => '    ' . $line), "\n");
-
-                Psl\invariant(
-                    $data === $expected_data,
-                    "For resolver: %s\nFor path %s:\n  Expected data:\n%s\n  Actual data:\n%s\n",
-                    $name,
-                    $uri,
-                    $pretty_data($expected_data),
-                    $pretty_data($data),
-                );
             }
         }
 
@@ -176,33 +175,32 @@ final class NaiveBenchmark
         $routes = Vec\map(self::getMap(), fn ($row) => $row[0]);
         $map = [HttpMethod::GET => Dict\associate($routes, $routes)];
 
-        $apcu_cache = new ApcuCache();
-        $file_cache = new FileCache();
-        $memory_cache = new MemoryCache();
+        $apcu_cache = new Cache\ApcuCache();
+        $file_cache = new Cache\FileCache();
+        $memory_cache = new Cache\MemoryCache();
 
         return [
-            'simple-regexp' => static fn () => new SimpleRegexpResolver($map),
-            'prefix-match' => static fn () => PrefixMatchingResolver::fromFlatMap($map),
+            'prefix-match' => static fn () => Resolver\PrefixMatchingResolver::fromFlatMap($map),
             'prefix-match(file)' => static function () use ($map, $file_cache) {
-                $prefix_map = $file_cache->fetch(__FUNCTION__ . __DIR__, function () use ($map) {
+                $prefix_map = $file_cache->parsing(function () use ($map) {
                     return Dict\map($map, fn ($v) => PrefixMatching\PrefixMap::fromFlatMap($v));
                 });
 
-                return new PrefixMatchingResolver($prefix_map);
+                return new Resolver\PrefixMatchingResolver($prefix_map);
             },
             'prefix-match(apcu)' => static function () use ($map, $apcu_cache) {
-                $prefix_map = $apcu_cache->fetch(__FUNCTION__ . __DIR__, function () use ($map) {
+                $prefix_map = $apcu_cache->parsing(function () use ($map) {
                     return Dict\map($map, fn ($v) => PrefixMatching\PrefixMap::fromFlatMap($v));
                 });
 
-                return new PrefixMatchingResolver($prefix_map);
+                return new Resolver\PrefixMatchingResolver($prefix_map);
             },
             'prefix-match(memory)' => static function () use ($map, $memory_cache) {
-                $prefix_map = $memory_cache->fetch(__FUNCTION__ . __DIR__, function () use ($map) {
+                $prefix_map = $memory_cache->parsing(function () use ($map) {
                     return Dict\map($map, fn ($v) => PrefixMatching\PrefixMap::fromFlatMap($v));
                 });
 
-                return new PrefixMatchingResolver($prefix_map);
+                return new Resolver\PrefixMatchingResolver($prefix_map);
             },
         ];
     }

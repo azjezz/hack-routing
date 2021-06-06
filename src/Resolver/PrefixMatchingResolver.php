@@ -88,7 +88,7 @@ final class PrefixMatchingResolver implements ResolverInterface
         if ($prefixes) {
             $prefix_len = Byte\length((string)Iter\first_key($prefixes));
             $prefix = Byte\slice($path, 0, $prefix_len);
-            if (Iter\contains_key($prefixes, $prefix)) {
+            if (isset($prefixes[$prefix])) {
                 return $this->resolveWithMap(
                     Byte\strip_prefix($path, $prefix),
                     $prefixes[$prefix],
@@ -96,8 +96,7 @@ final class PrefixMatchingResolver implements ResolverInterface
             }
         }
 
-        $regexps = $map->getRegexps();
-        foreach ($regexps as $regexp => $sub) {
+        foreach ($map->getRegexps() as $regexp => $sub) {
             if (preg_match('#^' . $regexp . '#', $path, $matches) !== 1) {
                 continue;
             }

@@ -6,14 +6,15 @@ namespace HackRouting\Cache;
 
 use HackRouting\PrefixMatching\PrefixMap;
 
+/**
+ * @template TResponder
+ */
 interface CacheInterface
 {
     /**
-     * @template T
+     * @param (callable(): array<non-empty-string, PrefixMap<TResponder>>) $parser
      *
-     * @param (callable(): array<non-empty-string, PrefixMap<T>>) $factory
-     *
-     * @return array<non-empty-string, PrefixMap<T>>
+     * @return array<non-empty-string, PrefixMap<TResponder>>
      */
-    public function fetch(string $item, callable $factory): array;
+    public function parsing(callable $parser): array;
 }

@@ -8,7 +8,13 @@ use HackRouting\PrefixMatching\PrefixMap;
 use Psl;
 use Psl\Env;
 use Psl\Filesystem;
+use Psl\SecureRandom;
 
+/**
+ * @template TResponder
+ *
+ * @implements CacheInterface<TResponder>
+ */
 final class FileCache implements CacheInterface
 {
     private string $directory;
@@ -21,27 +27,25 @@ final class FileCache implements CacheInterface
             (string) $directory
         );
 
-        $this->directory = $directory ?? (Env\temp_dir() . '/HackRouting');
+        $this->directory = $directory ?? (Env\temp_dir() . '/hack-routing-' . SecureRandom\string(8));
     }
 
     /**
-     * @template T
+     * @param (callable(): array<non-empty-string, PrefixMap<TResponder>>) $parser
      *
-     * @param (callable(): array<non-empty-string, PrefixMap<T>>) $factory
-     *
-     * @return array<non-empty-string, PrefixMap<T>>
+     * @return array<non-empty-string, PrefixMap<TResponder>>
      */
-    public function fetch(string $item, callable $factory): array
+    public function parsing(callable $parser): array
     {
-        $file = $this->directory . '/' . md5($item) . '.php';
+        $file = $this->directory . '/parsing.php';
         if (Filesystem\exists($file)) {
             /**
              * @psalm-suppress UnresolvableInclude
-             * @var array<non-empty-string, PrefixMap<T>> $result
+             * @var array<non-empty-string, PrefixMap<TResponder>> $result
              */
             $result = require $file;
         } else {
-            $result = $factory();
+            $result = $parser();
             Filesystem\write_file($file, "<?php return unserialize('" . serialize($result) . "');");
         }
 
