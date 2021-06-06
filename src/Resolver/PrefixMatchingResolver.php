@@ -21,6 +21,11 @@ use function preg_match;
 final class PrefixMatchingResolver implements ResolverInterface
 {
     /**
+     * @var array<non-empty-string, array<non-empty-string, array{0: TResponder, array<string, string>}>>
+     */
+    private array $lookup = [];
+
+    /**
      * @param array<non-empty-string, PrefixMap<TResponder>> $map
      */
     public function __construct(private array $map)
@@ -55,6 +60,7 @@ final class PrefixMatchingResolver implements ResolverInterface
 
     /**
      * @param non-empty-string $method
+     * @param non-empty-string $path
      *
      * @return array{0: TResponder, array<string, string>}
      *
@@ -62,12 +68,16 @@ final class PrefixMatchingResolver implements ResolverInterface
      */
     public function resolve(string $method, string $path): array
     {
+        if (isset($this->lookup[$method][$path])) {
+            return $this->lookup[$method][$path];
+        }
+
         $map = $this->map[$method] ?? null;
         if ($map === null) {
             throw new NotFoundException();
         }
 
-        return $this->resolveWithMap($path, $map);
+        return $this->lookup[$method][$path] = $this->resolveWithMap($path, $map);
     }
 
     /**
