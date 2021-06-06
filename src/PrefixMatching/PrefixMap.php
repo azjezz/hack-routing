@@ -19,6 +19,8 @@ use Psl\Vec;
  */
 final class PrefixMap
 {
+    private int $prefixLength;
+
     /**
      * @param array<string, TResponder> $literals
      * @param array<string, PrefixMap<TResponder>> $prefixes
@@ -29,6 +31,7 @@ final class PrefixMap
         private array $prefixes,
         private array $regexps,
     ) {
+        $this->prefixLength = $this->prefixes ? Byte\length(Iter\first_key($this->prefixes)) : 0;
     }
 
     /**
@@ -53,6 +56,11 @@ final class PrefixMap
     public function getRegexps(): array
     {
         return $this->regexps;
+    }
+
+    public function getPrefixLength(): int
+    {
+        return $this->prefixLength;
     }
 
     /**
@@ -234,27 +242,39 @@ final class PrefixMap
      * @return array{
      *   literals: array<string, TResponder>,
      *   prefixes: array<string, PrefixMap<TResponder>>,
-     *   regexps: array<string, PrefixMapOrResponder<TResponder>>
+     *   regexps: array<string, PrefixMapOrResponder<TResponder>>,
+     *   prefix_length: int
      * }
      *
      * @internal
      */
     public function __serialize(): array
     {
-        return ['literals' => $this->literals, 'prefixes' => $this->prefixes, 'regexps' => $this->regexps];
+        return [
+            'literals' => $this->literals,
+            'prefixes' => $this->prefixes,
+            'regexps' => $this->regexps,
+            'prefix_length' => $this->prefixLength,
+        ];
     }
 
     /**
      * @param array{
      *   literals: array<string, TResponder>,
      *   prefixes: array<string, PrefixMap<TResponder>>,
-     *   regexps: array<string, PrefixMapOrResponder<TResponder>>
+     *   regexps: array<string, PrefixMapOrResponder<TResponder>>,
+     *   prefix_length: int
      * } $data
      *
      * @internal
      */
     public function __unserialize(array $data): void
     {
-        ['literals' => $this->literals, 'prefixes' => $this->prefixes, 'regexps' => $this->regexps] = $data;
+        [
+            'literals' => $this->literals,
+            'prefixes' => $this->prefixes,
+            'regexps' => $this->regexps,
+            'prefix_length' => $this->prefixLength,
+        ] = $data;
     }
 }

@@ -7,11 +7,15 @@ namespace HackRouting\Resolver;
 use HackRouting\HttpException\NotFoundException;
 use HackRouting\PrefixMatching\PrefixMap;
 use Psl\Dict;
-use Psl\Iter;
 use Psl\Str\Byte;
 
-use function is_string;
+use function array_filter;
+use function array_merge;
 use function preg_match;
+use function strlen;
+use function substr;
+
+use const ARRAY_FILTER_USE_KEY;
 
 /**
  * @template TResponder
@@ -68,6 +72,11 @@ final class PrefixMatchingResolver implements ResolverInterface
      */
     public function resolve(string $method, string $path): array
     {
+        /**
+         * @TODO(azjezz): add bloom filter as suggested by fred
+         *
+         * @see https://en.m.wikipedia.org/wiki/Bloom_filter#Counting_Bloom_filters
+         */
         if (isset($this->lookup[$method][$path])) {
             return $this->lookup[$method][$path];
         }
@@ -96,11 +105,10 @@ final class PrefixMatchingResolver implements ResolverInterface
 
         $prefixes = $map->getPrefixes();
         if ($prefixes) {
-            $prefix_len = Byte\length((string)Iter\first_key($prefixes));
-            $prefix = Byte\slice($path, 0, $prefix_len);
+            $prefix = Byte\slice($path, 0, $map->getPrefixLength());
             if (isset($prefixes[$prefix])) {
                 return $this->resolveWithMap(
-                    Byte\strip_prefix($path, $prefix),
+                    substr($path, strlen($prefix)),
                     $prefixes[$prefix],
                 );
             }
@@ -112,10 +120,10 @@ final class PrefixMatchingResolver implements ResolverInterface
             }
 
             $matched = $matches[0];
-            $remaining = Byte\strip_prefix($path, $matched);
+            $remaining = substr($path, strlen($matched));
 
             /** @var array<string, string> $data */
-            $data = Dict\filter_keys($matches, static fn (int|string $key): bool => is_string($key));
+            $data = array_filter($matches, 'is_string', ARRAY_FILTER_USE_KEY);
 
             if ($sub->isResponder()) {
                 if ($remaining === '') {
@@ -130,7 +138,7 @@ final class PrefixMatchingResolver implements ResolverInterface
                 continue;
             }
 
-            return array($responder, Dict\merge($data, $sub_data));
+            return array($responder, array_merge($data, $sub_data));
         }
 
         throw new NotFoundException();
