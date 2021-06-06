@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace HackRouting;
+namespace HackRouting\Resolver;
 
 use HackRouting\HttpException\NotFoundException;
 use HackRouting\PrefixMatching\PrefixMap;
@@ -16,9 +16,9 @@ use function preg_match;
 /**
  * @template TResponder
  *
- * @implements IResolver<TResponder>
+ * @implements ResolverInterface<TResponder>
  */
-final class PrefixMatchingResolver implements IResolver
+final class PrefixMatchingResolver implements ResolverInterface
 {
     /**
      * @param array<non-empty-string, PrefixMap<TResponder>> $map

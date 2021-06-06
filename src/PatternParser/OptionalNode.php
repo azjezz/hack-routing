@@ -24,4 +24,24 @@ final class OptionalNode implements Node
     {
         return '(?:' . $this->pattern->asRegexp($delimiter) . ')?';
     }
+
+    /**
+     * @param array{pattern: PatternNode} $data
+     *
+     * @internal
+     */
+    public function __unserialize(array $data): void
+    {
+        $this->pattern = $data['pattern'];
+    }
+
+    /**
+     * @return array{pattern: PatternNode}
+     *
+     * @internal
+     */
+    public function __serialize(): array
+    {
+        return ['pattern' => $this->pattern];
+    }
 }

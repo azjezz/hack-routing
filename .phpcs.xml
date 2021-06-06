@@ -5,8 +5,6 @@
 
     <file>src</file>
     <file>tests</file>
-    <file>examples</file>
-    <file>bin</file>
 
     <arg name="basepath" value="."/>
     <arg name="colors"/>

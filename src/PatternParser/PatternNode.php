@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace HackRouting\PatternParser;
 
-use Psl\Str ;
+use Psl\Str;
 use Psl\Vec;
 
 final class PatternNode implements Node
@@ -28,7 +28,7 @@ final class PatternNode implements Node
     {
         return '[' . Str\join(Vec\map(
             $this->children,
-            static fn (Node $child): string => $child->toStringForDebug()
+            static fn(Node $child): string => $child->toStringForDebug()
         ), ', ') . ']';
     }
 
@@ -36,7 +36,26 @@ final class PatternNode implements Node
     {
         return Str\join(Vec\map(
             $this->children,
-            static fn (Node $child): string => $child->asRegexp($delimiter)
+            static fn(Node $child): string => $child->asRegexp($delimiter)
         ), '');
+    }
+
+    /**
+     * @return array{children: list<Node>}
+     * @internal
+     */
+    public function __serialize(): array
+    {
+        return ['children' => $this->children];
+    }
+
+    /**
+     * @param array{children: list<Node>} $data
+     *
+     * @internal
+     */
+    public function __unserialize(array $data): void
+    {
+        $this->children = $data['children'];
     }
 }

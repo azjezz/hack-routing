@@ -40,6 +40,27 @@ final class ParameterNode implements Node
         if ($re === null) {
             $re = '[^/]+';
         }
+
         return '(?<' . preg_quote($this->getName(), $delimiter) . '>' . $re . ')';
+    }
+
+    /**
+     * @return array{name: string, regexp: string|null}
+     *
+     * @internal
+     */
+    public function __serialize(): array
+    {
+        return ['name' => $this->name, 'regexp' => $this->regexp];
+    }
+
+    /**
+     * @param array{name: string, regexp: string|null} $data
+     *
+     * @internal
+     */
+    public function __unserialize(array $data): void
+    {
+        ['name' => $this->name, 'regexp' => $this->regexp] = $data;
     }
 }

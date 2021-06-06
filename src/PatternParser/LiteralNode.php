@@ -30,4 +30,24 @@ final class LiteralNode implements Node
     {
         return preg_quote($this->getText(), $delimiter);
     }
+
+    /**
+     * @return array{text: string}
+     *
+     * @internal
+     */
+    public function __serialize(): array
+    {
+        return ['text' => $this->text];
+    }
+
+    /**
+     * @param array{text: string} $data
+     *
+     * @internal
+     */
+    public function __unserialize(array $data): void
+    {
+        ['text' => $this->text] = $data;
+    }
 }

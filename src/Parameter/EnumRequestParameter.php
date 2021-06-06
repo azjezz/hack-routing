@@ -39,10 +39,7 @@ final class EnumRequestParameter extends TypedUriParameter
      */
     public function getUriFragment(mixed $input): string
     {
-        Psl\invariant(Iter\contains($this->enum_values, $input), 'Invalid Enum value "%s" given, expected one of: "%s".', $input, Str\join($this->enum_values, '", "'));
-
-        /** @var non-empty-string */
-        return (string)$input;
+        return $this->assert((string) $input);
     }
 
     /**
@@ -50,7 +47,12 @@ final class EnumRequestParameter extends TypedUriParameter
      */
     public function assert(string $input): string
     {
-        Psl\invariant(Iter\contains($this->enum_values, $input), 'Invalid Enum value "%s" given, expected one of: "%s".', $input, Str\join($this->enum_values, '", "'));
+        Psl\invariant(
+            Iter\contains($this->enum_values, $input),
+            'Invalid Enum value "%s" given, expected one of: "%s".',
+            $input,
+            Str\join($this->enum_values, '", "'),
+        );
 
         /** @var non-empty-string */
         return $input;

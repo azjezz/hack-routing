@@ -4,18 +4,17 @@ declare(strict_types=1);
 
 namespace HackRouting\Tests;
 
-use HackRouting\AbstractMatcher;
+use HackRouting\AbstractRouter;
 use HackRouting\HttpException\MethodNotAllowedException;
 use HackRouting\HttpException\NotFoundException;
 use HackRouting\HttpMethod;
-use HackRouting\IResolver;
-use HackRouting\PrefixMatchingResolver;
-use HackRouting\SimpleRegexpResolver;
-use HackRouting\Tests\Fixture\TestMatcher;
+use HackRouting\Resolver\ResolverInterface;
+use HackRouting\Resolver\PrefixMatchingResolver;
+use HackRouting\Tests\Fixture\TestRouter;
 use PHPUnit\Framework\TestCase;
 use Psl\Dict;
 
-final class MatcherTest extends TestCase
+final class RouterTest extends TestCase
 {
     /**
      * @var list<non-empty-string>
@@ -102,7 +101,6 @@ final class MatcherTest extends TestCase
     public function getAllResolvers(): array
     {
         return [
-            array('simple regexp', fn($map) => new SimpleRegexpResolver($map)),
             array(
                 'prefix matching',
                 fn($map) => PrefixMatchingResolver::fromFlatMap($map),
@@ -191,12 +189,12 @@ final class MatcherTest extends TestCase
     /**
      * @dataProvider expectedMatchesWithResolvers
      *
-     * @param IResolver<string> $resolver
+     * @param ResolverInterface<string> $resolver
      * @param array<string, string> $expected_data
      */
     public function testAllResolvers(
         string $_resolver_name,
-        IResolver $resolver,
+        ResolverInterface $resolver,
         string $in,
         string $expected_responder,
         array $expected_data
@@ -278,10 +276,10 @@ final class MatcherTest extends TestCase
     }
 
     /**
-     * @param AbstractMatcher<array-key> $_1
-     * @param AbstractMatcher<string> $_2
+     * @param AbstractRouter<array-key> $_1
+     * @param AbstractRouter<string> $_2
      */
-    private function typeCheckCovariantTResponder(AbstractMatcher $_1, AbstractMatcher $_2): void
+    private function typeCheckCovariantTResponder(AbstractRouter $_1, AbstractRouter $_2): void
     {
         $this->addToAssertionCount(1);
     }
@@ -289,9 +287,9 @@ final class MatcherTest extends TestCase
     /**
      * @param null|array<non-empty-string, array<string, string>> $routes
      *
-     * @return TestMatcher<string>
+     * @return TestRouter<string>
      */
-    private function getRouter(?array $routes = null): TestMatcher
+    private function getRouter(?array $routes = null): TestRouter
     {
         if (null === $routes) {
             $routes = [
@@ -299,6 +297,6 @@ final class MatcherTest extends TestCase
             ];
         }
 
-        return new TestMatcher($routes);
+        return new TestRouter($routes);
     }
 }

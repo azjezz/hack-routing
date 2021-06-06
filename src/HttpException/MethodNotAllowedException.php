@@ -9,7 +9,7 @@ use Exception;
 final class MethodNotAllowedException extends HttpException
 {
     /**
-     * @param list<string> $allowed
+     * @param non-empty-list<non-empty-string> $allowed
      */
     public function __construct(
         protected array $allowed,
@@ -20,6 +20,9 @@ final class MethodNotAllowedException extends HttpException
         parent::__construct($message, $code, $previous);
     }
 
+    /**
+     * @return non-empty-list<non-empty-string>
+     */
     public function getAllowedMethods(): array
     {
         return $this->allowed;

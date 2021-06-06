@@ -8,7 +8,7 @@ namespace HackRouting\Examples\UrlPatternsExample;
 
 require_once(__DIR__ . '/../vendor/autoload.php');
 
-use HackRouting\AbstractMatcher;
+use HackRouting\AbstractRouter;
 use HackRouting\Cache\FileCache;
 use HackRouting\Cache\MemoryCache;
 use HackRouting\HttpMethod;
@@ -102,7 +102,7 @@ final class PageController extends WebController
 /**
  * @extends BaseRouter<class-string<WebController>>
  */
-final class UriPatternsExample extends AbstractMatcher
+final class UriPatternsExample extends AbstractRouter
 {
     /**
      * @return list<class-string<WebController>>

@@ -21,7 +21,7 @@ final class FileCache implements CacheInterface
             (string) $directory
         );
 
-        $this->directory = $directory ?? (Env\temp_dir() . '/hack_routing');
+        $this->directory = $directory ?? (Env\temp_dir() . '/HackRouting');
     }
 
     /**
