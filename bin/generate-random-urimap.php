@@ -17,7 +17,7 @@ use Psl\IO;
 // Dump out a massive URI map for testing/benchmarking
 final class RandomUriMapGenerator
 {
-    public const  TOP_LEVEL_COUNT = 50;
+    public const  TOP_LEVEL_COUNT = 500;
 
     public static function main(): void
     {
