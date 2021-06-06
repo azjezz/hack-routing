@@ -33,7 +33,7 @@ final class Router extends AbstractRouter
      * @param non-empty-string  $route      The Routes Path.
      * @param TResponder        $responder  The Responder.
      */
-    public function route(string $method, string $route, mixed $responder): Router
+    public function addRoute(string $method, string $route, mixed $responder): Router
     {
         $this->routes[Str\uppercase($method)][$route] = $responder;
 

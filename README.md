@@ -39,15 +39,15 @@ use HackRouting\HttpException;
 $cache = new Cache\ApcuCache();
 $router = new Router($cache);
 
-$router->route(HttpMethod::GET, '/', function(): string {
+$router->addRoute(HttpMethod::GET, '/', function(): string {
     return 'Hello, World!';
 });
 
-$router->route(HttpMethod::GET, '/user/{username}/', function(array $parameters): string {
+$router->addRoute(HttpMethod::GET, '/user/{username}/', function(array $parameters): string {
     return Str\format('Hello, %s!', $parameters['username']);
 });
 
-$router->route(HttpMethod::POST, '/', function(): string {
+$router->addRoute(HttpMethod::POST, '/', function(): string {
     return 'Hello, POST world';
 });
 
