@@ -11,11 +11,24 @@ use function var_export;
 
 final class LiteralNode implements Node
 {
-    public function __construct(private string $text)
+    /**
+     * @var non-empty-string
+     */
+    private string $text;
+
+    /**
+     * @psalm-assert non-empty-string $text
+     */
+    public function __construct(string $text)
     {
         Psl\invariant($text !== '', 'No empty literal nodes');
+
+        $this->text = $text;
     }
 
+    /**
+     * @return non-empty-string
+     */
     public function getText(): string
     {
         return $this->text;

@@ -9,6 +9,7 @@ use HackRouting\PatternParser\Parser;
 use Psl;
 use Psl\Dict;
 use Psl\Vec;
+
 use function array_keys;
 use function array_map;
 use function array_merge;
@@ -33,8 +34,7 @@ final class PrefixMap
         private array $prefixes,
         private array $regexps,
         private int $prefixLength,
-    )
-    {
+    ) {
     }
 
     /**
@@ -123,7 +123,7 @@ final class PrefixMap
 
             if ($node instanceof ParameterNode && $node->getRegexp() === null) {
                 $next = $nodes[0] ?? null;
-                if ($next instanceof LiteralNode && ($text = $next->getText()) && $text[0] === '/') {
+                if ($next instanceof LiteralNode && $next->getText()[0] === '/') {
                     $regexps[] = [$node->asRegexp('#'), $nodes, $responder];
                     continue;
                 }
@@ -154,7 +154,7 @@ final class PrefixMap
             /**
              * @param list<string> $keys
              */
-            static function (string|int $prefix, array $keys) use ($by_first): PrefixMap {
+            static function (string|int $prefix, array $keys) use ($by_first, $prefix_length): PrefixMap {
                 $prefix = (string)$prefix;
                 return self::fromFlatMapImpl(array_merge(...array_map(
                     /**
@@ -166,15 +166,16 @@ final class PrefixMap
                          *
                          * @return array{0: list<Node>, 1: Ts}
                          */
-                        static function (array $row) use ($prefix): array {
-                            if ($row[0] === $prefix) {
-                                return [$row[1], $row[2]];
+                        static function (array $row) use ($prefix, $prefix_length): array {
+                            [$text, $nodes, $responder] = $row;
+                            if ($text === $prefix) {
+                                return [$nodes, $responder];
                             }
 
-                            $suffix = substr($row[0], strlen($prefix));
+                            $suffix = substr($text, $prefix_length);
                             return [
-                                array_merge([new LiteralNode($suffix)], $row[1]),
-                                $row[2],
+                                array_merge([new LiteralNode($suffix)], $nodes),
+                                $responder,
                             ];
                         },
                         $by_first[$key],
