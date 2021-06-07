@@ -8,7 +8,9 @@ use HackRouting\PrefixMatching\PrefixMap;
 use Psl;
 use Psl\Env;
 use Psl\Filesystem;
-use Psl\SecureRandom;
+
+use function md5;
+use function file_exists;
 
 /**
  * @template TResponder
@@ -27,25 +29,25 @@ final class FileCache implements CacheInterface
             (string) $directory
         );
 
-        $this->directory = $directory ?? (Env\temp_dir() . '/hack-routing-' . SecureRandom\string(8));
+        $this->directory = $directory ?? Env\temp_dir() . '/hack-routing';
     }
 
     /**
-     * @param (callable(): array<non-empty-string, PrefixMap<TResponder>>) $parser
+     * @param (callable(): array<non-empty-string, PrefixMap<TResponder>>) $callback
      *
      * @return array<non-empty-string, PrefixMap<TResponder>>
      */
-    public function parsing(callable $parser): array
+    public function get(string $item, callable $callback): array
     {
-        $file = $this->directory . '/parsing.php';
-        if (Filesystem\exists($file)) {
+        $file = $this->directory . '/' . md5($item) . '/prefix-map.php';
+        if (file_exists($file)) {
             /**
              * @psalm-suppress UnresolvableInclude
              * @var array<non-empty-string, PrefixMap<TResponder>> $result
              */
             $result = require $file;
         } else {
-            $result = $parser();
+            $result = $callback();
             Filesystem\write_file($file, "<?php return unserialize('" . serialize($result) . "');");
         }
 

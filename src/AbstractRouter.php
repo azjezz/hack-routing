@@ -114,7 +114,7 @@ abstract class AbstractRouter
             return $this->resolver;
         }
 
-        $routes = $this->cache->parsing(function (): array {
+        $routes = $this->cache->get(__FILE__, function (): array {
             return Dict\map(
                 $this->getRoutes(),
                 /**

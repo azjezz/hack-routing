@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace HackRouting;
 
-use Psl\Str;
-
 /**
  * @template TResponder
  *
@@ -35,7 +33,7 @@ final class Router extends AbstractRouter
      */
     public function addRoute(string $method, string $route, mixed $responder): Router
     {
-        $this->routes[Str\uppercase($method)][$route] = $responder;
+        $this->routes[$method][$route] = $responder;
 
         return $this;
     }

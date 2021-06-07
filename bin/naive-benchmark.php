@@ -182,21 +182,21 @@ final class NaiveBenchmark
         return [
             'prefix-match' => static fn () => Resolver\PrefixMatchingResolver::fromFlatMap($map),
             'prefix-match(file)' => static function () use ($map, $file_cache) {
-                $prefix_map = $file_cache->parsing(function () use ($map) {
+                $prefix_map = $file_cache->get(__FILE__, function () use ($map) {
                     return Dict\map($map, fn ($v) => PrefixMatching\PrefixMap::fromFlatMap($v));
                 });
 
                 return new Resolver\PrefixMatchingResolver($prefix_map);
             },
             'prefix-match(apcu)' => static function () use ($map, $apcu_cache) {
-                $prefix_map = $apcu_cache->parsing(function () use ($map) {
+                $prefix_map = $apcu_cache->get(__FILE__, function () use ($map) {
                     return Dict\map($map, fn ($v) => PrefixMatching\PrefixMap::fromFlatMap($v));
                 });
 
                 return new Resolver\PrefixMatchingResolver($prefix_map);
             },
             'prefix-match(memory)' => static function () use ($map, $memory_cache) {
-                $prefix_map = $memory_cache->parsing(function () use ($map) {
+                $prefix_map = $memory_cache->get(__FILE__, function () use ($map) {
                     return Dict\map($map, fn ($v) => PrefixMatching\PrefixMap::fromFlatMap($v));
                 });
 

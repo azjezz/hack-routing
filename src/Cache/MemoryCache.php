@@ -14,21 +14,17 @@ use HackRouting\PrefixMatching\PrefixMap;
 final class MemoryCache implements CacheInterface
 {
     /**
-     * @var array<non-empty-string, PrefixMap<TResponder>>
+     * @var array<string, array<non-empty-string, PrefixMap<TResponder>>>
      */
-    private ?array $parse_cache = null;
+    private array $parse_cache = [];
 
     /**
-     * @param (callable(): array<non-empty-string, PrefixMap<TResponder>>) $parser
+     * @param (callable(): array<non-empty-string, PrefixMap<TResponder>>) $callback
      *
      * @return array<non-empty-string, PrefixMap<TResponder>>
      */
-    public function parsing(callable $parser): array
+    public function get(string $item, callable $callback): array
     {
-        if (null === $this->parse_cache) {
-            $this->parse_cache = $parser();
-        }
-
-        return $this->parse_cache;
+        return $this->parse_cache[$item] ?? ($this->parse_cache[$item] = $callback());
     }
 }

@@ -12,9 +12,9 @@ use HackRouting\PrefixMatching\PrefixMap;
 interface CacheInterface
 {
     /**
-     * @param (callable(): array<non-empty-string, PrefixMap<TResponder>>) $parser
+     * @param (callable(): array<non-empty-string, PrefixMap<TResponder>>) $callback
      *
      * @return array<non-empty-string, PrefixMap<TResponder>>
      */
-    public function parsing(callable $parser): array;
+    public function get(string $item, callable $callback): array;
 }
