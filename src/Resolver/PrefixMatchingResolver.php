@@ -74,7 +74,7 @@ final class PrefixMatchingResolver implements ResolverInterface
     /**
      * @template T
      *
-     * @param non-empty-string $path
+     * @param string $path
      * @param PrefixMap<T> $map
      *
      * @return array{0: T, array<string, string>}
@@ -89,13 +89,11 @@ final class PrefixMatchingResolver implements ResolverInterface
 
         if ($prefixes = $map->prefixes) {
             $prefix = substr($path, 0, $map->prefixLength);
-            if (isset($prefixes[$prefix])) {
-                $path = substr($path, $map->prefixLength);
-                if ($path === '') {
-                    throw new NotFoundException();
-                }
-
-                return self::resolveWithMap($path, $prefixes[$prefix]);
+            if ($prefix_map = $prefixes[$prefix] ?? null) {
+                return self::resolveWithMap(
+                    substr($path, $map->prefixLength),
+                    $prefix_map
+                );
             }
         }
 
@@ -115,8 +113,12 @@ final class PrefixMatchingResolver implements ResolverInterface
                 }
             }
 
-            if ($remaining === '') {
-                return [$sub->getResponder(), $data];
+            if ($sub->isResponder()) {
+                if ($remaining === '') {
+                    return [$sub->getResponder(), $data];
+                }
+
+                continue;
             }
 
             try {
