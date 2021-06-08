@@ -24,6 +24,8 @@ function get_example_inputs(): iterable
     yield array(HttpMethod::GET, '/');
     yield array(HttpMethod::GET, '/user/foo');
     yield array(HttpMethod::GET, '/user/bar');
+    yield array(HttpMethod::GET, '/contact-us');
+    yield array(HttpMethod::GET, '/about-us');
     yield array(HttpMethod::POST, '/');
 }
 
@@ -37,12 +39,20 @@ function get_example_inputs(): iterable
         return 'Hello, World!';
     });
 
-    $router->addRoute(HttpMethod::GET, '/user/{username}', function (array $parameters): string {
+    $router->addRoute(HttpMethod::GET, '/user/{username:[a-z]+}', function (array $parameters): string {
         return Str\format('Hello, %s!', $parameters['username']);
     });
 
     $router->addRoute(HttpMethod::POST, '/', function (): string {
         return 'Hello, POST world';
+    });
+
+    $router->addRoute(HttpMethod::GET, '/{page:about|contact}-us', static function (array $parameters): string {
+        if ($parameters['page'] === 'about') {
+            return 'Learn about us';
+        }
+
+        return 'Contact us';
     });
 
     foreach (get_example_inputs() as [$method, $path]) {
