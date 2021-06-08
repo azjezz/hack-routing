@@ -6,14 +6,11 @@ namespace HackRouting\Resolver;
 
 use HackRouting\HttpException\NotFoundException;
 use HackRouting\PrefixMatching\PrefixMap;
-
-use function array_filter;
 use function array_merge;
+use function is_string;
 use function preg_match;
 use function strlen;
 use function substr;
-
-use const ARRAY_FILTER_USE_KEY;
 
 /**
  * @template TResponder
@@ -50,13 +47,14 @@ final class PrefixMatchingResolver implements ResolverInterface
             /**
              * @param array<string, Tr> $flat_map
              */
-            static fn (array $flat_map): PrefixMap => PrefixMap::fromFlatMap($flat_map),
+            static fn(array $flat_map): PrefixMap => PrefixMap::fromFlatMap($flat_map),
             $map,
         ));
     }
 
     /**
      * @param non-empty-string $method
+     * @param non-empty-string $path
      *
      * @return array{0: TResponder, array<string, string>}
      *
@@ -69,17 +67,20 @@ final class PrefixMatchingResolver implements ResolverInterface
             throw new NotFoundException();
         }
 
-        return $this->resolveWithMap($path, $map);
+        return self::resolveWithMap($path, $map);
     }
 
     /**
-     * @param PrefixMap<TResponder> $map
+     * @template T
      *
-     * @return array{0: TResponder, array<string, string>}
+     * @param non-empty-string $path
+     * @param PrefixMap<T> $map
+     *
+     * @return array{0: T, array<string, string>}
      *
      * @throws NotFoundException
      */
-    private function resolveWithMap(string $path, PrefixMap $map): array
+    private static function resolveWithMap($path, $map)
     {
         if (isset($map->literals[$path])) {
             return [$map->literals[$path], []];
@@ -88,7 +89,7 @@ final class PrefixMatchingResolver implements ResolverInterface
         if ($prefixes = $map->prefixes) {
             $prefix = substr($path, 0, $map->getPrefixLength());
             if (isset($prefixes[$prefix])) {
-                return $this->resolveWithMap(
+                return self::resolveWithMap(
                     substr($path, $map->prefixLength),
                     $prefixes[$prefix],
                 );
@@ -104,18 +105,19 @@ final class PrefixMatchingResolver implements ResolverInterface
             $remaining = substr($path, strlen($matched));
 
             /** @var array<string, string> $data */
-            $data = array_filter($matches, 'is_string', ARRAY_FILTER_USE_KEY);
-
-            if ($sub->isResponder()) {
-                if ($remaining === '') {
-                    return [$sub->getResponder(), $data];
+            $data = [];
+            foreach ($matches as $name => $match) {
+                if (is_string($name)) {
+                    $data[$name] = $match;
                 }
+            }
 
-                continue;
+            if ($remaining === '') {
+                return [$sub->getResponder(), $data];
             }
 
             try {
-                [$responder, $sub_data] = $this->resolveWithMap($remaining, $sub->getMap());
+                [$responder, $sub_data] = self::resolveWithMap($remaining, $sub->getMap());
             } catch (NotFoundException) {
                 continue;
             }

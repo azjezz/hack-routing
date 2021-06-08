@@ -4,17 +4,17 @@ declare(strict_types=1);
 
 namespace HackRouting\PatternParser;
 
-use Psl\Str\Byte;
-use Psl\Vec;
+use function array_filter;
+use function str_split;
 
 /**
- * @return list<Token>
+ * @return array<int, Token>
  */
 function tokenize(string $pattern): array
 {
     $tokens = [];
     $buffer = '';
-    foreach (Byte\chunk($pattern) as $byte) {
+    foreach (str_split($pattern) as $byte) {
         if (Token::isValidType($byte)) {
             $tokens[] = new Token(Token::TYPE_STRING, $buffer);
             $buffer = '';
@@ -28,7 +28,7 @@ function tokenize(string $pattern): array
         $tokens[] = new Token(Token::TYPE_STRING, $buffer);
     }
 
-    return Vec\filter(
+    return array_filter(
         $tokens,
         static fn (Token $t): bool => !($t->getType() === Token::TYPE_STRING && $t->getValue() === '')
     );

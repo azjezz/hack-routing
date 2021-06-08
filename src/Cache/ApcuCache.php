@@ -6,7 +6,6 @@ namespace HackRouting\Cache;
 
 use Psl;
 use HackRouting\PrefixMatching\PrefixMap;
-use Psl\SecureRandom;
 
 /**
  * @template TResponder
@@ -27,7 +26,6 @@ final class ApcuCache implements CacheInterface
      */
     public function get(string $item, callable $callback): array
     {
-        $item = '/hack-routing/' . $item . '/prefix-map';
         /** @var false|array<non-empty-string, PrefixMap<TResponder>> $result */
         $result = apcu_fetch($item, $success);
         if ($success && false !== $result) {
