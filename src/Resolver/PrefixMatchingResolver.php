@@ -6,6 +6,7 @@ namespace HackRouting\Resolver;
 
 use HackRouting\HttpException\NotFoundException;
 use HackRouting\PrefixMatching\PrefixMap;
+
 use function array_merge;
 use function is_string;
 use function preg_match;
@@ -87,12 +88,14 @@ final class PrefixMatchingResolver implements ResolverInterface
         }
 
         if ($prefixes = $map->prefixes) {
-            $prefix = substr($path, 0, $map->getPrefixLength());
+            $prefix = substr($path, 0, $map->prefixLength);
             if (isset($prefixes[$prefix])) {
-                return self::resolveWithMap(
-                    substr($path, $map->prefixLength),
-                    $prefixes[$prefix],
-                );
+                $path = substr($path, $map->prefixLength);
+                if ($path === '') {
+                    throw new NotFoundException();
+                }
+
+                return self::resolveWithMap($path, $prefixes[$prefix]);
             }
         }
 
