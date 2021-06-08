@@ -25,16 +25,48 @@ use function substr;
 final class PrefixMap
 {
     /**
+     * @readonly
+     *
+     * @var array<string, TResponder>
+     */
+    public array $literals;
+
+    /**
+     * @readonly
+     *
+     * @var array<string, PrefixMap<TResponder>>
+     */
+    public array $prefixes;
+
+    /**
+     * @readonly
+     *
+     * @var array<string, PrefixMapOrResponder<TResponder>>
+     */
+    public array $regexps;
+
+    /**
+     * @readonly
+     *
+     * @var int
+     */
+    public int $prefixLength;
+
+    /**
      * @param array<string, TResponder> $literals
      * @param array<string, PrefixMap<TResponder>> $prefixes
      * @param array<string, PrefixMapOrResponder<TResponder>> $regexps
      */
     public function __construct(
-        private array $literals,
-        private array $prefixes,
-        private array $regexps,
-        private int $prefixLength,
+        array $literals,
+        array $prefixes,
+        array $regexps,
+        int $prefixLength,
     ) {
+        $this->literals = $literals;
+        $this->prefixes = $prefixes;
+        $this->regexps = $regexps;
+        $this->prefixLength = $prefixLength;
     }
 
     /**

@@ -81,23 +81,21 @@ final class PrefixMatchingResolver implements ResolverInterface
      */
     private function resolveWithMap(string $path, PrefixMap $map): array
     {
-        $literals = $map->getLiterals();
-        if (isset($literals[$path])) {
-            return [$literals[$path], []];
+        if (isset($map->literals[$path])) {
+            return [$map->literals[$path], []];
         }
 
-        $prefixes = $map->getPrefixes();
-        if ($prefixes) {
+        if ($prefixes = $map->prefixes) {
             $prefix = substr($path, 0, $map->getPrefixLength());
             if (isset($prefixes[$prefix])) {
                 return $this->resolveWithMap(
-                    substr($path, strlen($prefix)),
+                    substr($path, $map->prefixLength),
                     $prefixes[$prefix],
                 );
             }
         }
 
-        foreach ($map->getRegexps() as $regexp => $sub) {
+        foreach ($map->regexps as $regexp => $sub) {
             if (preg_match('#^' . $regexp . '#', $path, $matches) !== 1) {
                 continue;
             }
@@ -110,8 +108,9 @@ final class PrefixMatchingResolver implements ResolverInterface
 
             if ($sub->isResponder()) {
                 if ($remaining === '') {
-                    return array($sub->getResponder(), $data);
+                    return [$sub->getResponder(), $data];
                 }
+
                 continue;
             }
 
@@ -121,7 +120,7 @@ final class PrefixMatchingResolver implements ResolverInterface
                 continue;
             }
 
-            return array($responder, array_merge($data, $sub_data));
+            return [$responder, array_merge($data, $sub_data)];
         }
 
         throw new NotFoundException();

@@ -124,7 +124,6 @@ abstract class AbstractRouter
             );
         });
 
-        $this->resolver = new Resolver\PrefixMatchingResolver($routes);
-        return $this->resolver;
+        return $this->resolver = new Resolver\PrefixMatchingResolver($routes);
     }
 }

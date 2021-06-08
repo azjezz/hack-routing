@@ -40,9 +40,8 @@ final class PrefixMapOrResponder
      */
     public function getMap(): PrefixMap
     {
-        $map = $this->map;
-        Psl\invariant($map !== null, 'Called getMap() when !isMap()');
-        return $map;
+        /** @var PrefixMap<TResponder> */
+        return $this->map;
     }
 
     /**
@@ -50,9 +49,8 @@ final class PrefixMapOrResponder
      */
     public function getResponder(): mixed
     {
-        $responder = $this->responder;
-        Psl\invariant($responder !== null, 'Called getResponder() when !isResponder');
-        return $responder;
+        /** @return TResponder */
+        return $this->responder;
     }
 
     /**
