@@ -8,11 +8,11 @@ use HackRouting\HttpException\InternalServerErrorException;
 use HackRouting\HttpException\MethodNotAllowedException;
 use HackRouting\HttpException\NotFoundException;
 use HackRouting\PrefixMatching\PrefixMap;
-use Psl\Str;
-use Psl\Dict;
-use Psl\Vec;
 use Throwable;
 
+use function array_keys;
+use function array_map;
+use function strtoupper;
 use function rawurldecode;
 
 /**
@@ -49,11 +49,12 @@ abstract class AbstractRouter
      */
     final public function match(string $method, string $path): array
     {
-        $method = Str\uppercase($method);
+        /** @var non-empty-string $method */
+        $method = strtoupper($method);
         $resolver = $this->getResolver();
         try {
             [$responder, $data] = $resolver->resolve($method, $path);
-            $data = Dict\map($data, static fn(string $value): string => rawurldecode($value));
+            $data = array_map(static fn(string $value): string => rawurldecode($value), $data);
             return [$responder, $data];
         } catch (NotFoundException $e) {
             $allowed = $this->getAllowedMethods($path);
@@ -63,7 +64,7 @@ abstract class AbstractRouter
 
             if ($method === HttpMethod::HEAD && $allowed === [HttpMethod::GET]) {
                 [$responder, $data] = $resolver->resolve(HttpMethod::GET, $path);
-                $data = Dict\map($data, static fn(string $value): string => rawurldecode($value));
+                $data = array_map(static fn(string $value): string => rawurldecode($value), $data);
                 return [$responder, $data];
             }
 
@@ -92,7 +93,7 @@ abstract class AbstractRouter
     {
         $resolver = $this->getResolver();
         $allowed = [];
-        foreach (Vec\keys($this->getRoutes()) as $method) {
+        foreach (array_keys($this->getRoutes()) as $method) {
             try {
                 $resolver->resolve($method, $path);
 
@@ -115,12 +116,9 @@ abstract class AbstractRouter
         }
 
         $routes = $this->cache->get(__FILE__, function (): array {
-            return Dict\map(
-                $this->getRoutes(),
-                /**
-                 * @param array<string, TResponder> $method_routes
-                 */
+            return array_map(
                 static fn(array $method_routes): PrefixMap => PrefixMap::fromFlatMap($method_routes),
+                $this->getRoutes(),
             );
         });
 
