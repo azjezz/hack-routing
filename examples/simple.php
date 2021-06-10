@@ -21,12 +21,20 @@ require_once(__DIR__ . '/../vendor/autoload.php');
  */
 function get_example_inputs(): iterable
 {
-    yield array(HttpMethod::GET, '/');
-    yield array(HttpMethod::GET, '/user/foo');
-    yield array(HttpMethod::GET, '/user/bar');
-    yield array(HttpMethod::GET, '/contact-us');
-    yield array(HttpMethod::GET, '/about-us');
-    yield array(HttpMethod::POST, '/');
+    yield [HttpMethod::GET, '/'];
+    yield [HttpMethod::GET, '/user/foo'];
+    yield [HttpMethod::GET, '/user/bar'];
+    yield [HttpMethod::GET, '/contact-us'];
+    yield [HttpMethod::GET, '/about-us'];
+    yield [HttpMethod::POST, '/'];
+
+    // known 404
+    yield [HttpMethod::GET, '/user/31'];
+    yield [HttpMethod::GET, '/user/HELLO'];
+    yield [HttpMethod::GET, '/user/Hans8'];
+
+    // known 403
+    yield [HttpMethod::PUT, '/user/azjezz'];
 }
 
 (static function (): void {
@@ -60,20 +68,18 @@ function get_example_inputs(): iterable
             [$responder, $parameters] = $router->match($method, $path);
 
             $response = $responder($parameters);
-
-            $method = Str\pad_right(Str\format('[%s]', $method), 8);
-            $request = Str\pad_right(Str\format('%s %s', $method, $path), 25);
-
-            $output->write(Str\format("%s -> %s\n", $request, $response));
         } catch (HttpException\MethodNotAllowedException $e) {
-            $allowed_methods = $e->getAllowedMethods();
-
-            // Handle 403.
+            $response = 'Error[403]: allowed methods "' . Str\join($e->getAllowedMethods(), '", "') . '"';
         } catch (HttpException\NotFoundException) {
-            // Handle 404.
+            $response = 'Error[404]';
         } catch (HttpException\InternalServerErrorException) {
-            // Handle 500.
+            $response = 'Error[500]';
         }
+
+        $method = Str\pad_right(Str\format('[%s]', $method), 8);
+        $request = Str\pad_right(Str\format('%s %s', $method, $path), 25);
+
+        $output->write(Str\format("%s -> %s\n", $request, $response));
     }
 
     exit(0);
