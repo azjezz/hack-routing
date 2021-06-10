@@ -39,25 +39,34 @@ use HackRouting\HttpException;
 $cache = new Cache\ApcuCache();
 $router = new Router($cache);
 
-$router->addRoute(HttpMethod::GET, '/', function(): string {
+$router->addRoute(HttpMethod::GET, '/', function (): string {
     return 'Hello, World!';
 });
 
-$router->addRoute(HttpMethod::GET, '/user/{username}/', function(array $parameters): string {
+$router->addRoute(HttpMethod::GET, '/user/{username:[a-z]+}', function (array $parameters): string {
     return Str\format('Hello, %s!', $parameters['username']);
 });
 
-$router->addRoute(HttpMethod::POST, '/', function(): string {
+$router->addRoute(HttpMethod::POST, '/', function (): string {
     return 'Hello, POST world';
 });
 
+$router->addRoute(HttpMethod::GET, '/{page:about|contact}-us', static function (array $parameters): string {
+    if ($parameters['page'] === 'about') {
+        return 'Learn about us';
+    }
+
+    return 'Contact us';
+});
+
+
 try {
-    [$responder, $parameters] = $router->match('GET', '/hello/azjezz');
+    [$responder, $parameters] = $router->match('GET', '/user/azjezz');
     
     $responder($parameters); // Hello, azjezz!
 } catch (HttpException\MethodNotAllowedException $e) {
     $allowed_methods = $e->getAllowedMethods();
-    // Handle 403.
+    // Handle 405.
 } catch (HttpException\NotFoundException) {
     // Handle 404.
 } catch (HttpException\InternalServerErrorException) {

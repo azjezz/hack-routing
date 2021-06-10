@@ -32,8 +32,9 @@ function get_example_inputs(): iterable
     yield [HttpMethod::GET, '/user/31'];
     yield [HttpMethod::GET, '/user/HELLO'];
     yield [HttpMethod::GET, '/user/Hans8'];
+    yield [HttpMethod::GET, '/who-us'];
 
-    // known 403
+    // known 405
     yield [HttpMethod::PUT, '/user/azjezz'];
 }
 
@@ -69,7 +70,7 @@ function get_example_inputs(): iterable
 
             $response = $responder($parameters);
         } catch (HttpException\MethodNotAllowedException $e) {
-            $response = 'Error[403]: allowed methods "' . Str\join($e->getAllowedMethods(), '", "') . '"';
+            $response = 'Error[405]: allowed methods "' . Str\join($e->getAllowedMethods(), '", "') . '"';
         } catch (HttpException\NotFoundException) {
             $response = 'Error[404]';
         } catch (HttpException\InternalServerErrorException) {
